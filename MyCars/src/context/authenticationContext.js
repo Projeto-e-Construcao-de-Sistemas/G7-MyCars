@@ -95,7 +95,7 @@ export const AuthenticationProvider = ({ children }) => {
             await updateProfile(auth.currentUser, { displayName: name });
             setUser(usercred.user);
             sessionStorage.setItem("@AuthFirebase:user", JSON.stringify(usercred.user));
-            return <Navigate to="/profile" />;
+            return <Navigate to="/" />;
 
         } catch (err) {
             console.log(err);
