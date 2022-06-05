@@ -1,10 +1,32 @@
-import React from 'react'
-import Navbar from '../../components/Navbar'
+import React, { useContext, useEffect } from 'react';
+import { AuthenticationContext } from '../../context/authenticationContext';
+import { useNavigate } from 'react-router';
+import { Navbar } from '../../components/Navbar';
 
-export const Home = () =>{
+
+export const Home = () => {
+
+  const { signOutFromApp, signed } = useContext(AuthenticationContext);
+  const userLogado = JSON.parse(sessionStorage.getItem("@AuthFirebase:user"));
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    function checkUserHasPassword() {
+      const providerData = userLogado.providerData;
+      if (providerData.length === 1 && providerData[0].providerId === 'google.com') {
+        navigate("/completeAccount");
+      }
+    }
+
+    if(signed){
+      checkUserHasPassword();
+    }
+  }, [navigate, userLogado])
+
+
   return (
     <div className='root'>
-      <Navbar current="home"/>
+      <Navbar current="home" />
     </div>
   )
 }

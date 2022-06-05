@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react'
 import { Navigate } from 'react-router';
-import Navbar from '../../components/Navbar';
+import { Navbar } from '../../components/Navbar';
 import { AuthenticationContext } from '../../context/authenticationContext';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -25,7 +25,7 @@ export const CreateAccount = () => {
     }
 
     if (signed) {
-        return <Navigate to="/profile" />;
+        return <Navigate to="/" />;
     }
 
     return (
@@ -51,7 +51,7 @@ export const CreateAccount = () => {
                             <label htmlFor="floatingPassword4">Senha</label>
                         </div>
                         <button type="button" className="w-100 btn btn-lg btn-primary" onClick={createUser}>Criar minha conta</button>
-                        <h4 className="h4 mb-3 fw-normal" style={{marginTop:'30px', marginBottom:'30px'}}>Ou cadastre-se com sua conta Google</h4>
+                        <h4 className="h4 mb-3 fw-normal" style={{ marginTop: '30px', marginBottom: '30px' }}>Ou cadastre-se com sua conta Google</h4>
                         <button type="button" className="w-100 btn btn-lg btn-outline-primary" onClick={loginGoogle}><FontAwesomeIcon icon={faG} /> Cadastrar com Google</button>
                     </form>
                 </main>
