@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 
 import './profile.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faLocationDot, faSave, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faLocationDot, faSave, faTrash, faUser } from '@fortawesome/free-solid-svg-icons';
 import { auth, db } from '../../services/firebaseConfig';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { updateProfile } from 'firebase/auth';
@@ -23,6 +23,32 @@ export const Profile = () => {
     const [phone, setPhone] = useState(null);
     const [birthday, setBirthday] = useState('dd/mm/aaaa');
     const [cpf, setCpf] = useState(null);
+
+    const [cep, setCep] = useState(null);
+    const [rua, setRua] = useState(null);
+    const [complemento, setComplemento] = useState(null);
+    const [bairro, setBairro] = useState(null);
+    const [estado, setEstado] = useState(null);
+    const [cidade, setCidade] = useState(null);
+
+    function handleCep(e) {
+        setCep(e.target.value);
+    }
+    function handleRua(e) {
+        setRua(e.target.value);
+    }
+    function handleComplemento(e) {
+        setComplemento(e.target.value);
+    }
+    function handleBairro(e) {
+        setBairro(e.target.value);
+    }
+    function handleEstado(e) {
+        setEstado(e.target.value);
+    }
+    function handleCidade(e) {
+        setCidade(e.target.value);
+    }
 
     function handleName(e) {
         setName(e.target.value);
@@ -41,15 +67,44 @@ export const Profile = () => {
     }
 
     async function updateUserData() {
-        console.log(phone);
         await setDoc(doc(db, "users", userLogado.uid), {
             phone,
             birthday,
             cpf
         });
         await updateProfile(auth.currentUser, { displayName: name });
+        await updateAddress();
         sessionStorage.setItem("@AuthFirebase:user", JSON.stringify(auth.currentUser));
         navigate('/');
+    }
+
+    async function updateAddress() {
+        if (!cep && !rua && !bairro && !estado && !cidade) {
+            return;
+        }
+
+        await setDoc(doc(db, "address", userLogado.uid), {
+            cep,
+            rua,
+            bairro,
+            estado,
+            cidade,
+            complemento
+        });
+
+    }
+
+    function checkCep(e) {
+        const cep = e.target.value.replace(/\D/g, '');
+        fetch(`https://viacep.com.br/ws/${cep}/json/`)
+            .then(res => res.json()).then(data => {
+                setRua(data.logradouro);
+                setBairro(data.bairro);
+                setCidade(data.localidade);
+                setEstado(data.uf);
+
+                document.querySelector('#complemento').focus();
+            });
     }
 
     useEffect(() => {
@@ -66,11 +121,25 @@ export const Profile = () => {
             if (phone === null) setPhone(userData.phone);
             if (birthday === 'dd/mm/aaaa') setBirthday(userData.birthday);
             if (cpf === null) setCpf(userData.cpf);
+
+        }
+
+        async function retrieveUserAddress() {
+            const userAddressDoc = doc(db, 'address', userLogado.uid);
+            const userAddress = (await getDoc(userAddressDoc)).data();
+
+            if (cep === null) setCep(userAddress.cep);
+            if (rua === null) setRua(userAddress.rua);
+            if (complemento === null) setComplemento(userAddress.complemento);
+            if (bairro === null) setBairro(userAddress.bairro);
+            if (estado === null) setEstado(userAddress.estado);
+            if (cidade === null) setCidade(userAddress.cidade);
         }
 
         if (signed) {
             checkUserHasPassword();
             retrieveUserData();
+            retrieveUserAddress();
         } else {
             navigate('/');
         }
@@ -123,7 +192,6 @@ export const Profile = () => {
                                     <label htmlFor="floatingInput9">CPF</label>
                                 </div>
 
-
                             </form>
                         </div>
                         <div className="col-md-5">
@@ -133,36 +201,37 @@ export const Profile = () => {
                             <form className='form-signin w-100 m-auto text-center'>
 
                                 <div className="form-floating">
-                                    <input type="text" id="floatingInput2" className="form-control" placeholder='CEP' />
+                                    <input value={cep} type="text" id="floatingInput2" className="form-control" placeholder='CEP' onBlur={checkCep} onChange={handleCep} />
                                     <label htmlFor="floatingInput2">CEP</label>
                                 </div>
                                 <div className="form-floating">
-                                    <input type="text" id="floatingInput3" className="form-control" placeholder='Rua' />
+                                    <input value={rua} type="text" id="floatingInput3" className="form-control" placeholder='Rua' onChange={handleRua} />
                                     <label htmlFor="floatingInput3">Rua</label>
                                 </div>
                                 <div className="form-floating">
-                                    <input type="text" id="floatingInput4" className="form-control" placeholder='Complemento' />
-                                    <label htmlFor="floatingInput4">Complemento</label>
+                                    <input value={complemento} type="text" id="complemento" className="form-control" placeholder='Complemento' onChange={handleComplemento} />
+                                    <label htmlFor="complemento">Complemento</label>
                                 </div>
                                 <div className="form-floating">
-                                    <input type="text" id="floatingInput5" className="form-control" placeholder='Bairro' />
+                                    <input value={bairro} type="text" id="floatingInput5" className="form-control" placeholder='Bairro' onChange={handleBairro} />
                                     <label htmlFor="floatingInput5">Bairro</label>
                                 </div>
                                 <div className="form-floating">
-                                    <input type="text" id="floatingInput7" className="form-control" placeholder='Estado' />
+                                    <input value={estado} type="text" id="floatingInput7" className="form-control" placeholder='Estado' onChange={handleEstado} />
                                     <label htmlFor="floatingInput7">Estado</label>
                                 </div>
                                 <div className="form-floating">
-                                    <input type="text" id="floatingInput6" className="form-control" placeholder='Cidade' />
+                                    <input value={cidade} type="text" id="floatingInput6" className="form-control" placeholder='Cidade' onChange={handleCidade} />
                                     <label htmlFor="floatingInput6">Cidade</label>
                                 </div>
                             </form>
                         </div>
                     </div>
-                    <div className="row ">
-                        <div className="col-md-3"></div>
-                        <button onClick={updateUserData} type="button" className='btn btn-primary col-md-4' style={{ marginTop: '15px' }}>
+                    <div className="container row d-flex justify-content-between pt-5">
+                        <button onClick={updateUserData} type="button" className='btn btn-success col-md-4' style={{ marginTop: '15px' }}>
                             <FontAwesomeIcon icon={faSave} /> Salvar alterações</button>
+                        <button  type="button" className='btn btn-danger col-md-3' style={{ marginTop: '15px' }}>
+                            <FontAwesomeIcon icon={faTrash} /> Deletar minha conta</button>
 
                     </div>
                 </main>
