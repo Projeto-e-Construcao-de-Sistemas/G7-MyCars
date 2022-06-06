@@ -8,12 +8,13 @@ import './profile.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLocationDot, faSave, faTrash, faUser } from '@fortawesome/free-solid-svg-icons';
 import { auth, db } from '../../services/firebaseConfig';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { updateProfile } from 'firebase/auth';
+import { deleteDoc, doc, getDoc, setDoc } from 'firebase/firestore';
+import { deleteUser, updateProfile } from 'firebase/auth';
+import { Modal } from '../../components/Modal';
 
 export const Profile = () => {
 
-    const { signed } = useContext(AuthenticationContext);
+    const { signed, signOutFromApp } = useContext(AuthenticationContext);
     const userLogado = JSON.parse(sessionStorage.getItem("@AuthFirebase:user"));
 
     const navigate = useNavigate();
@@ -91,6 +92,18 @@ export const Profile = () => {
             cidade,
             complemento
         });
+    }
+
+    async function deleteUserData() {
+        try {
+            await deleteUser(auth.currentUser);
+        } catch (err) {
+            alert('Você precisa realizar login novamente para executar essa ação.');
+            return signOutFromApp();
+        }
+
+        await deleteDoc(doc(db, "address", userLogado.uid));
+        await deleteDoc(doc(db, "users", userLogado.uid));
 
     }
 
@@ -230,10 +243,16 @@ export const Profile = () => {
                     <div className="container row d-flex justify-content-between pt-5">
                         <button onClick={updateUserData} type="button" className='btn btn-success col-md-4' style={{ marginTop: '15px' }}>
                             <FontAwesomeIcon icon={faSave} /> Salvar alterações</button>
-                        <button  type="button" className='btn btn-danger col-md-3' style={{ marginTop: '15px' }}>
-                            <FontAwesomeIcon icon={faTrash} /> Deletar minha conta</button>
-
+                        <button data-bs-toggle="modal" data-bs-target="#modal" type="button" className='btn btn-danger col-md-3' style={{ marginTop: '15px' }}>
+                            <FontAwesomeIcon icon={faTrash} /> Deletar meu perfil</button>
                     </div>
+                    <Modal
+                        title={"Tem certeza que deseja excluir o seu perfil?"}
+                        textBody={"Essa ação não poderá ser desfeita!"}
+                        confirmText={"Sim! Excluir meu perfil!"}
+                        cancelText={"Não! Cancelar"}
+                        onConfirm={deleteUserData}
+                    />
                 </main>
             </div>
         </div>
