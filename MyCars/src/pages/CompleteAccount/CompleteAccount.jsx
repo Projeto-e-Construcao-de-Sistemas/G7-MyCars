@@ -10,6 +10,9 @@ export const CompleteAccount = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [name, setName] = useState("");
+    const [phone, setPhone] = useState();
+    const [birthday, setBirthday] = useState();
+    const [cpf, setCpf] = useState();
 
     const navigate = useNavigate();
 
@@ -32,7 +35,7 @@ export const CompleteAccount = () => {
         if (signed) {
             checkUserHasPassword();
             completeFields();
-        }else{
+        } else {
             navigate('/');
         }
 
@@ -40,7 +43,7 @@ export const CompleteAccount = () => {
 
 
     async function completeAccount() {
-        linkCredentials(password, name).then(() => {
+        linkCredentials(password, name, phone, birthday, cpf).then(() => {
             navigate("/");
         });
     }
@@ -61,6 +64,19 @@ export const CompleteAccount = () => {
                         <div className="form-floating">
                             <input value={email || ''} type="email" id="floatingInput2" className="form-control" disabled placeholder='name@example.com' onChange={(e) => { setEmail(e.target.value) }} />
                             <label htmlFor="floatingInput2">Endereço de e-mail</label>
+                        </div>
+
+                        <div className="form-floating">
+                            <input type="text" id="floatingInput7" className="form-control" placeholder='Telefone' onChange={(e) => { setPhone(e.target.value) }} />
+                            <label htmlFor="floatingInput7">Telefone</label>
+                        </div>
+                        <div className="form-floating">
+                            <input type="date" id="floatingInput8" className="form-control" placeholder='Data de nascimento' onChange={(e) => { setBirthday(e.target.value) }} />
+                            <label htmlFor="floatingInput8">Data de nascimento</label>
+                        </div>
+                        <div className="form-floating">
+                            <input type="text" id="floatingInput9" className="form-control" placeholder='CPF' onChange={(e) => { setCpf(e.target.value) }} />
+                            <label htmlFor="floatingInput9">CPF</label>
                         </div>
 
                         <div className="form-floating">

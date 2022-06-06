@@ -10,8 +10,9 @@ import {
     updateProfile
 } from "firebase/auth";
 
-import { auth } from "../services/firebaseConfig";
+import { auth, db } from "../services/firebaseConfig";
 import { Navigate } from "react-router-dom";
+import { doc, setDoc } from "firebase/firestore";
 
 const provider = new GoogleAuthProvider();
 
@@ -51,7 +52,7 @@ export const AuthenticationProvider = ({ children }) => {
             });
     }
 
-    const createUserEmailPassword = (email, password, name) => {
+    const createUserEmailPassword = (email, password, name, phone, birthday, cpf) => {
         createUserWithEmailAndPassword(auth, email, password)
             .then((credential) => {
                 const token = credential.token;
@@ -60,15 +61,25 @@ export const AuthenticationProvider = ({ children }) => {
                 updateProfile(auth.currentUser, { displayName: name }).then(() => {
                     setUser(user);
 
-                    sessionStorage.setItem("@AuthFirebase:token", token);
-                    sessionStorage.setItem("@AuthFirebase:user", JSON.stringify(user));
+                    createUserData(phone, birthday, cpf, credential.user.uid).then(() => {
+                        sessionStorage.setItem("@AuthFirebase:token", token);
+                        sessionStorage.setItem("@AuthFirebase:user", JSON.stringify(user));
 
+                        return <Navigate to="/login" />
+                    });
                 }).catch((err) => console.log(err));
 
-                return <Navigate to="/login" />
             }).catch((error) => {
                 console.log(error);
             });
+    }
+
+    const createUserData = async (phone, birthday, cpf, uid) => {
+        await setDoc(doc(db, "users", uid), {
+            phone,
+            birthday,
+            cpf
+        });
     }
 
     const signInEmailPassword = (email, password, name) => {
@@ -86,21 +97,21 @@ export const AuthenticationProvider = ({ children }) => {
             });
     }
 
-    const linkCredentials = async (password, name) => {
+    const linkCredentials = async (password, name, phone, birthday, cpf) => {
         const credentialEmailPassword = EmailAuthProvider.credential(user.email, password);
 
         try {
             const usercred = await linkWithCredential(auth.currentUser, credentialEmailPassword);
 
             await updateProfile(auth.currentUser, { displayName: name });
+            await createUserData(phone, birthday, cpf, usercred.user.uid);
+
             setUser(usercred.user);
             sessionStorage.setItem("@AuthFirebase:user", JSON.stringify(usercred.user));
             return <Navigate to="/" />;
-
         } catch (err) {
             console.log(err);
         }
-
     }
 
     function signOutFromApp() {
