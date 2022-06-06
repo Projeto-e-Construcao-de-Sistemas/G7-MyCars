@@ -6,7 +6,7 @@ import { Navbar } from '../../components/Navbar';
 
 export const Home = () => {
 
-  const { signOutFromApp, signed } = useContext(AuthenticationContext);
+  const { signed } = useContext(AuthenticationContext);
   const userLogado = JSON.parse(sessionStorage.getItem("@AuthFirebase:user"));
   const navigate = useNavigate();
 
@@ -18,10 +18,10 @@ export const Home = () => {
       }
     }
 
-    if(signed){
+    if (signed) {
       checkUserHasPassword();
     }
-  }, [navigate, userLogado])
+  }, [navigate, userLogado, signed])
 
 
   return (
