@@ -7,18 +7,49 @@ import { Link } from 'react-router-dom';
 import './profile.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLocationDot, faSave, faUser } from '@fortawesome/free-solid-svg-icons';
+import { auth, db } from '../../services/firebaseConfig';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { updateProfile } from 'firebase/auth';
 
 export const Profile = () => {
 
     const { signed } = useContext(AuthenticationContext);
     const userLogado = JSON.parse(sessionStorage.getItem("@AuthFirebase:user"));
+
     const navigate = useNavigate();
 
     const [name, setName] = useState(userLogado.displayName);
-    const [email, setEmail] = useState(userLogado.email);
+    const [email] = useState(userLogado.email);
+    const [phone, setPhone] = useState(null);
+    const [birthday, setBirthday] = useState('dd/mm/aaaa');
+    const [cpf, setCpf] = useState(null);
 
-    function handleName(e){
+    function handleName(e) {
         setName(e.target.value);
+    }
+
+    function handlePhone(e) {
+        setPhone(e.target.value);
+    }
+
+    function handleBirthday(e) {
+        setBirthday(e.target.value);
+    }
+
+    function handleCpf(e) {
+        setCpf(e.target.value);
+    }
+
+    async function updateUserData() {
+        console.log(phone);
+        await setDoc(doc(db, "users", userLogado.uid), {
+            phone,
+            birthday,
+            cpf
+        });
+        await updateProfile(auth.currentUser, { displayName: name });
+        sessionStorage.setItem("@AuthFirebase:user", JSON.stringify(auth.currentUser));
+        navigate('/');
     }
 
     useEffect(() => {
@@ -29,12 +60,21 @@ export const Profile = () => {
             }
         }
 
+        async function retrieveUserData() {
+            const userDoc = doc(db, 'users', userLogado.uid);
+            const userData = (await getDoc(userDoc)).data();
+            if (phone === null) setPhone(userData.phone);
+            if (birthday === 'dd/mm/aaaa') setBirthday(userData.birthday);
+            if (cpf === null) setCpf(userData.cpf);
+        }
+
         if (signed) {
             checkUserHasPassword();
+            retrieveUserData();
         } else {
             navigate('/');
         }
-    }, [navigate, userLogado])
+    }, [navigate, userLogado, phone, birthday, cpf, signed])
 
 
     return (
@@ -61,20 +101,34 @@ export const Profile = () => {
                             <form className='form-signin w-100 m-auto text-center'>
 
                                 <div className="form-floating">
-                                    <input value={name} type="text" id="floatingInput1" className="form-control" placeholder='Name' onChange={handleName}/>
+                                    <input value={name} name="name" type="text" id="floatingInput1" className="form-control" placeholder='Name' onChange={handleName} />
                                     <label htmlFor="floatingInput1">Nome</label>
                                 </div>
 
                                 <div className="form-floating">
-                                    <input value={email} type="email" disabled id="floatingInput1" className="form-control" placeholder='example@example.com' />
+                                    <input value={email} name="email" type="email" disabled id="floatingInput1" className="form-control" placeholder='example@example.com' />
                                     <label htmlFor="floatingInput1">Endereço de e-mail</label>
                                 </div>
+
+                                <div className="form-floating">
+                                    <input value={phone} name="phone" type="text" id="floatingInput7" className="form-control" placeholder='Telefone' onChange={handlePhone} />
+                                    <label htmlFor="floatingInput7">Telefone</label>
+                                </div>
+                                <div className="form-floating">
+                                    <input value={birthday} name="birthday" type="date" id="floatingInput8" className="form-control" placeholder='Data de nascimento' onChange={handleBirthday} />
+                                    <label htmlFor="floatingInput8">Data de nascimento</label>
+                                </div>
+                                <div className="form-floating">
+                                    <input value={cpf} name="cpf" type="text" id="floatingInput9" className="form-control" placeholder='CPF' onChange={handleCpf} />
+                                    <label htmlFor="floatingInput9">CPF</label>
+                                </div>
+
 
                             </form>
                         </div>
                         <div className="col-md-5">
                             <h3 className="h3">
-                                <FontAwesomeIcon icon={faLocationDot}/> Endereço</h3>
+                                <FontAwesomeIcon icon={faLocationDot} /> Endereço</h3>
 
                             <form className='form-signin w-100 m-auto text-center'>
 
@@ -107,7 +161,7 @@ export const Profile = () => {
                     </div>
                     <div className="row ">
                         <div className="col-md-3"></div>
-                        <button className='btn btn-primary col-md-4' style={{ marginTop: '15px' }}>
+                        <button onClick={updateUserData} type="button" className='btn btn-primary col-md-4' style={{ marginTop: '15px' }}>
                             <FontAwesomeIcon icon={faSave} /> Salvar alterações</button>
 
                     </div>

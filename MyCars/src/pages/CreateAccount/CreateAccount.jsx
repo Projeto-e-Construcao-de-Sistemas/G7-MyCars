@@ -14,14 +14,16 @@ export const CreateAccount = () => {
     const [email, setEmail] = useState();
     const [password, setPassword] = useState();
     const [name, setName] = useState();
+    const [phone, setPhone] = useState();
+    const [birthday, setBirthday] = useState();
+    const [cpf, setCpf] = useState();
 
     async function loginGoogle() {
         await signInGoogle();
     }
 
-
     async function createUser() {
-        await createUserEmailPassword(email, password, name);
+        await createUserEmailPassword(email, password, name, phone, birthday, cpf);
     }
 
     if (signed) {
@@ -47,7 +49,19 @@ export const CreateAccount = () => {
                         </div>
 
                         <div className="form-floating">
-                            <input type="password" name="" className='form-control' id="floatingPassword4" placeholder='Password' onChange={(e) => { setPassword(e.target.value) }} />
+                            <input type="text" id="floatingInput7" className="form-control" placeholder='Telefone' onChange={(e) => { setPhone(e.target.value) }} />
+                            <label htmlFor="floatingInput7">Telefone</label>
+                        </div>
+                        <div className="form-floating">
+                            <input type="date" id="floatingInput8" className="form-control" placeholder='Data de nascimento' onChange={(e) => { setBirthday(e.target.value) }} />
+                            <label htmlFor="floatingInput8">Data de nascimento</label>
+                        </div>
+                        <div className="form-floating">
+                            <input type="text" id="floatingInput9" className="form-control" placeholder='CPF' onChange={(e) => { setCpf(e.target.value) }} />
+                            <label htmlFor="floatingInput9">CPF</label>
+                        </div>
+                        <div className="form-floating">
+                            <input type="password" name="" minLength="6" className='form-control' id="floatingPassword4" placeholder='Password' onChange={(e) => { setPassword(e.target.value) }} />
                             <label htmlFor="floatingPassword4">Senha</label>
                         </div>
                         <button type="button" className="w-100 btn btn-lg btn-primary" onClick={createUser}>Criar minha conta</button>
