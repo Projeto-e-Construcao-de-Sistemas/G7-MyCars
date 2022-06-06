@@ -36,7 +36,7 @@ export const CompleteAccount = () => {
             navigate('/');
         }
 
-    }, [navigate]);
+    }, [navigate, signed]);
 
 
     async function completeAccount() {

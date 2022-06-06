@@ -1,4 +1,6 @@
-import React, { Component, useContext } from 'react';
+import { faRightFromBracket, faUser } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthenticationContext } from '../context/authenticationContext';
 
@@ -12,8 +14,6 @@ export const Navbar = ({ current }) => {
         await signOutFromApp();
         navigate("/login");
     }
-
-    // const { current } = this.props;
 
     return (
         <div className='container'>
@@ -31,11 +31,17 @@ export const Navbar = ({ current }) => {
 
                     {!signed ? (
                         <>
-                        <Link to="/login" className='btn btn-outline-primary me-2'>Fazer Login</Link>
-                        <Link to="/createAccount" type='button' className='btn btn-primary'>Cadastre-se</Link>
+                            <Link to="/login" className='btn btn-outline-primary me-2'>
+                                Fazer Login</Link>
+                            <Link to="/createAccount" type='button' className='btn btn-primary'>Cadastre-se</Link>
                         </>
                     ) : (
-                        <button type="button" onClick={signOut} className='btn btn-outline-primary'>Sair</button>
+                        <>
+                            <Link to="/profile" type="button" className={`btn ${current === 'profile' ? 'btn-primary' : ' btn-outline-primary'}`} >
+                                <FontAwesomeIcon icon={faUser} /> Meu perfil </Link>
+                            <button type="button" onClick={signOut} className='btn btn-outline-primary' style={{ marginLeft: "10px" }}>
+                                <FontAwesomeIcon icon={faRightFromBracket} /> Sair</button>
+                        </>
                     )}
                 </div>
             </header>

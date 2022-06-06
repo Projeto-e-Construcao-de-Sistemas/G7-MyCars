@@ -6,25 +6,3 @@ body{
   margin: 0%;
 
 }
-
-nav ul{
-  text-align: center;
-  top: 0;
-  padding: 0;
-  margin: 0;
-  width: 100%;
-  background-color: darkblue;
-  color: white;
-  text-decoration: none;
-  list-style: none;
-  float: right;
-}
-
-nav ul li{
-  float: right;
-  margin: 10px;
-}
-
-nav ul li:first-child {
-  float: left;
-}
