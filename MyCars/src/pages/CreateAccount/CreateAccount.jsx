@@ -22,8 +22,72 @@ export const CreateAccount = () => {
         await signInGoogle();
     }
 
-    async function createUser() {
-        await createUserEmailPassword(email, password, name, phone, birthday, cpf);
+    function validatePassword() {
+        if(password){
+            if(password.length < 6){
+                window.alert("A senha precisa possuir no mínimo 6 digitos");
+                return false
+            }
+        }
+        return false
+    }
+
+    function validateCPF(){
+        console.log("cpf")
+        let bool = true
+        let cpfV = cpf.replace(/[^\d]+/g,'')	
+	    if(cpfV === '') bool = false	
+        if(cpfV.length < 11) bool = false
+        if( cpfV === "00000000000" || 
+            cpfV === "11111111111" || 
+            cpfV === "22222222222" || 
+            cpfV === "33333333333" || 
+            cpfV === "44444444444" || 
+            cpfV === "55555555555" || 
+            cpfV === "66666666666" || 
+            cpfV === "77777777777" || 
+            cpfV === "88888888888" || 
+            cpfV=== "99999999999") bool = false
+        //algoritmo de validação de cpf
+        var add;
+        var rev;
+        add = 0;
+        if (cpfV === "00000000000") bool = false;
+        for (let i=1; i<=9; i++) add = add + parseInt(cpfV.substring(i-1, i)) * (11 - i);
+        rev = (add * 10) % 11;
+
+            if ((rev === 10) || (rev === 11))  rev = 0;
+            if (rev !== parseInt(cpfV.substring(9, 10)) ) bool = false;
+
+        add = 0;
+            for (let i = 1; i <= 10; i++) add = add + parseInt(cpfV.substring(i-1, i)) * (12 - i);
+            rev = (add * 10) % 11;
+
+            if ((rev === 10) || (rev === 11))  rev = 0;
+            if (rev !== parseInt(cpfV.substring(10, 11) ) ) bool = false;
+            if(bool === false){
+                window.alert("CPF inválido")
+                return false
+            }
+            return true
+    }
+
+    function validateBirthday(){
+        let date = new Date()
+        let year = date.getFullYear()
+        let bday = birthday.split("-")
+        console.log(bday, year)
+        if(bday[0] > year-18){
+            console.log("false")
+            return false
+        }
+        console.log("true")
+    }
+
+    async function createUser() {       
+        if(validateBirthday()){
+            await createUserEmailPassword(email, password, name, phone, birthday, cpf);
+        }
     }
 
     if (signed) {
@@ -49,15 +113,15 @@ export const CreateAccount = () => {
                         </div>
 
                         <div className="form-floating">
-                            <input type="text" id="floatingInput7" className="form-control" placeholder='Telefone' onChange={(e) => { setPhone(e.target.value) }} />
-                            <label htmlFor="floatingInput7">Telefone</label>
+                            <input type="text" id="floatingInput7" className="form-control" placeholder='Telefone' maxLength="11" onChange={(e) => { setPhone(e.target.value) }} />
+                            <label htmlFor="floatingInput7">Telefone com DDD</label>
                         </div>
                         <div className="form-floating">
-                            <input type="date" id="floatingInput8" className="form-control" placeholder='Data de nascimento' onChange={(e) => { setBirthday(e.target.value) }} />
+                            <input type="date" id="floatingInput8" className="form-control" placeholder='Data de nascimento' max="2999-12-31" onChange={(e) => { setBirthday(e.target.value) }} />
                             <label htmlFor="floatingInput8">Data de nascimento</label>
                         </div>
                         <div className="form-floating">
-                            <input type="text" id="floatingInput9" className="form-control" placeholder='CPF' onChange={(e) => { setCpf(e.target.value) }} />
+                            <input type="text" id="floatingInput9" className="form-control" placeholder='CPF' maxLength="11" onChange={(e) => { setCpf(e.target.value) }} />
                             <label htmlFor="floatingInput9">CPF</label>
                         </div>
                         <div className="form-floating">
