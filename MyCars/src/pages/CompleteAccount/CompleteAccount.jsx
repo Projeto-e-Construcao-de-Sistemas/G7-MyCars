@@ -1,20 +1,30 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { Navbar } from '../../components/Navbar';
 import { AuthenticationContext } from '../../context/authenticationContext';
 import './completeAccount.css';
 
+import { useForm, Controller } from 'react-hook-form';
+import InputMask from "react-input-mask";
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from "yup";
+
 export const CompleteAccount = () => {
     const { linkCredentials, signed } = useContext(AuthenticationContext);
-
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [name, setName] = useState("");
-    const [phone, setPhone] = useState();
-    const [birthday, setBirthday] = useState();
-    const [cpf, setCpf] = useState();
-
     const navigate = useNavigate();
+
+    const schema = yup.object({
+        name: yup.string().required("Por favor, preencha o campo nome."),
+        email: yup.string().email('Digite um e-mail válido').required('Por favor, preencha o campo e-mail.'),
+        phone: yup.string().required('Por favor, digite um telefone válido com DDD.'),
+        birthday: yup.string().required('Por favor preencha a data de nascimento.'),
+        cpf: yup.string().required('Por favor preencha o CPF.'),
+        password: yup.string().min(6, "A senha digitada precisa ter pelo menos 6 caracteres").required('Por favor digite uma senha.')
+    });
+
+    const { register, handleSubmit, setValue, control, formState: { errors } } = useForm({
+        resolver: yupResolver(schema)
+    });
 
     function checkUserHasPassword() {
         const user = JSON.parse(sessionStorage.getItem("@AuthFirebase:user"));
@@ -25,11 +35,10 @@ export const CompleteAccount = () => {
     }
 
     useEffect(() => {
-
         function completeFields() {
             const user = JSON.parse(sessionStorage.getItem("@AuthFirebase:user"));
-            setEmail(user.email);
-            setName(user.displayName);
+            setValue("email", user.email);
+            setValue("name", user.displayName);
         }
 
         if (signed) {
@@ -39,10 +48,10 @@ export const CompleteAccount = () => {
             navigate('/');
         }
 
-    }, [navigate, signed]);
+    }, [navigate, signed, setValue]);
 
-
-    async function completeAccount() {
+    async function onSubmit(user) {
+        const { password, name, phone, birthday, cpf } = user;
         linkCredentials(password, name, phone, birthday, cpf).then(() => {
             navigate("/");
         });
@@ -53,37 +62,95 @@ export const CompleteAccount = () => {
             <Navbar current="createAccount" />
             <div className="body login">
                 <main className='form-signin w-100 m-auto text-center card'>
-                    <form >
+                    <form onSubmit={handleSubmit(onSubmit)}>
                         <h1 className="h3 mb-3 fw-normal">Só mais um passo!</h1>
                         <h1 className="h3 mb-3 fw-normal">Precisamos completar o seu cadastro!</h1>
                         <div className="form-floating">
-                            <input value={name || ''} type="text" id="floatingInput1" className="form-control" placeholder='Name' onChange={(e) => { setName(e.target.value) }} />
-                            <label htmlFor="floatingInput1">Nome</label>
+                            <input type="text" id="name" name='name' className="form-control"  {...register('name')} />
+                            <label htmlFor="name">Nome</label>
+
+                            <p className='error-message'>{errors.name?.message}</p>
                         </div>
 
                         <div className="form-floating">
-                            <input value={email || ''} type="email" id="floatingInput2" className="form-control" disabled placeholder='name@example.com' onChange={(e) => { setEmail(e.target.value) }} />
-                            <label htmlFor="floatingInput2">Endereço de e-mail</label>
+                            <input type="email" name="email" id="email" className="form-control" disabled {...register('email')} />
+                            <label htmlFor="email">Endereço de e-mail</label>
+                            <p className='error-message'>{errors.email?.message}</p>
                         </div>
 
                         <div className="form-floating">
-                            <input type="text" id="floatingInput7" className="form-control" placeholder='Telefone' onChange={(e) => { setPhone(e.target.value) }} />
-                            <label htmlFor="floatingInput7">Telefone</label>
-                        </div>
-                        <div className="form-floating">
-                            <input type="date" id="floatingInput8" className="form-control" placeholder='Data de nascimento' onChange={(e) => { setBirthday(e.target.value) }} />
-                            <label htmlFor="floatingInput8">Data de nascimento</label>
-                        </div>
-                        <div className="form-floating">
-                            <input type="text" id="floatingInput9" className="form-control" placeholder='CPF' onChange={(e) => { setCpf(e.target.value) }} />
-                            <label htmlFor="floatingInput9">CPF</label>
-                        </div>
+                            <Controller
+                                name="phone"
+                                control={control}
+                                defaultValue=""
+                                rules={{
+                                    required: true,
+                                }}
+                                id="phone"
+                                className="form-control"
+                                render={({ field }) => (
+                                    <InputMask
+                                        mask="(99)99999-9999"
+                                        maskChar="_"
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                    >
+                                        {(inputProps) => (
+                                            <input
+                                                className="form-control"
+                                                {...inputProps}
+                                                type="text"
+                                            />
+                                        )}
+                                    </InputMask>
+                                )}
+                            />
+                            <label htmlFor="phone">Telefone com DDD</label>
+                            <p className='error-message'>{errors.phone?.message}</p>
 
-                        <div className="form-floating">
-                            <input type="password" name="" className='form-control' id="floatingPassword" placeholder='Password' onChange={(e) => { setPassword(e.target.value) }} />
-                            <label htmlFor="floatingPassword">Senha</label>
                         </div>
-                        <button type="button" className="w-100 btn btn-lg btn-primary" onClick={completeAccount}>Completar cadstro</button>
+                        <div className="form-floating">
+                            <input type="date" id="birthday" name="birthday" className="form-control" placeholder='Data de nascimento' max="2999-12-31" {...register('birthday')} />
+                            <label htmlFor="birthday">Data de nascimento</label>
+                            <p className='error-message'>{errors.birthday?.message}</p>
+                        </div>
+                        <div className="form-floating">
+                            <Controller
+                                name="cpf"
+                                control={control}
+                                defaultValue=""
+                                rules={{
+                                    required: true,
+                                }}
+                                id="cpf"
+                                className="form-control"
+                                render={({ field }) => (
+                                    <InputMask
+                                        mask="999.999.999-99"
+                                        maskChar="_"
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                    >
+                                        {(inputProps) => (
+                                            <input
+                                                className="form-control"
+                                                {...inputProps}
+                                                type="text"
+                                            />
+                                        )}
+                                    </InputMask>
+                                )}
+                            />
+                            <label htmlFor="cpf">CPF</label>
+                            <p className='error-message'>{errors.cpf?.message}</p>
+
+                        </div>
+                        <div className="form-floating">
+                            <input type="password" name="password" minLength="6" className='form-control' id="password" placeholder='Password' {...register('password')} />
+                            <label htmlFor="password">Senha</label>
+                            <p className='error-message'>{errors.password?.message}</p>
+                        </div>
+                        <button type="submit" className="w-100 btn btn-lg btn-primary">Completar cadstro</button>
                     </form>
                 </main>
             </div>
