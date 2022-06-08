@@ -3,7 +3,6 @@ import { AuthenticationContext } from '../../context/authenticationContext';
 import { useNavigate } from 'react-router';
 import { Navbar } from '../../components/Navbar';
 
-
 export const Home = () => {
 
   const { signed } = useContext(AuthenticationContext);
@@ -12,6 +11,7 @@ export const Home = () => {
 
   useEffect(() => {
     function checkUserHasPassword() {
+      if(!userLogado) return;
       const providerData = userLogado.providerData;
       if (providerData.length === 1 && providerData[0].providerId === 'google.com') {
         navigate("/completeAccount");

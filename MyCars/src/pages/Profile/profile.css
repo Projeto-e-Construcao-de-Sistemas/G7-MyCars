@@ -130,3 +130,7 @@ body {
       white-space: nowrap;
       -webkit-overflow-scrolling: touch;
     }
+    .error-message{
+      color: red;
+      text-align: left;
+    }

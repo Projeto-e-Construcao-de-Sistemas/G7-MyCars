@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { AuthenticationContext } from '../../context/authenticationContext';
 import { useNavigate } from 'react-router';
 import { Sidebar } from '../../components/Sidebar';
@@ -12,6 +12,11 @@ import { deleteDoc, doc, getDoc, setDoc } from 'firebase/firestore';
 import { deleteUser, updateProfile } from 'firebase/auth';
 import { Modal } from '../../components/Modal';
 
+import { useForm, Controller } from 'react-hook-form';
+import InputMask from "react-input-mask";
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from "yup";
+
 export const Profile = () => {
 
     const { signed, signOutFromApp } = useContext(AuthenticationContext);
@@ -19,68 +24,34 @@ export const Profile = () => {
 
     const navigate = useNavigate();
 
-    const [name, setName] = useState(userLogado.displayName);
-    const [email] = useState(userLogado.email);
-    const [phone, setPhone] = useState(null);
-    const [birthday, setBirthday] = useState('dd/mm/aaaa');
-    const [cpf, setCpf] = useState(null);
+    const schema = yup.object({
+        name: yup.string().required("Por favor, preencha o campo nome."),
+        email: yup.string().email('Digite um e-mail válido').required('Por favor, preencha o campo e-mail.'),
+        phone: yup.string().required('Por favor, digite um telefone válido com DDD.'),
+        birthday: yup.string().required('Por favor preencha a data de nascimento.'),
+        cpf: yup.string().required('Por favor preencha o CPF.')
+    });
 
-    const [cep, setCep] = useState(null);
-    const [rua, setRua] = useState(null);
-    const [complemento, setComplemento] = useState(null);
-    const [bairro, setBairro] = useState(null);
-    const [estado, setEstado] = useState(null);
-    const [cidade, setCidade] = useState(null);
+    const { register, handleSubmit, setValue, setFocus, control, formState: { errors } } = useForm({
+        resolver: yupResolver(schema)
+    });
 
-    function handleCep(e) {
-        setCep(e.target.value);
-    }
-    function handleRua(e) {
-        setRua(e.target.value);
-    }
-    function handleComplemento(e) {
-        setComplemento(e.target.value);
-    }
-    function handleBairro(e) {
-        setBairro(e.target.value);
-    }
-    function handleEstado(e) {
-        setEstado(e.target.value);
-    }
-    function handleCidade(e) {
-        setCidade(e.target.value);
-    }
-
-    function handleName(e) {
-        setName(e.target.value);
-    }
-
-    function handlePhone(e) {
-        setPhone(e.target.value);
-    }
-
-    function handleBirthday(e) {
-        setBirthday(e.target.value);
-    }
-
-    function handleCpf(e) {
-        setCpf(e.target.value);
-    }
-
-    async function updateUserData() {
+    async function onSubmit(userData) {
+        const { name, phone, birthday, cpf, cep, rua, bairro, estado, cidade, complemento } = userData;
         await setDoc(doc(db, "users", userLogado.uid), {
             phone,
             birthday,
             cpf
         });
         await updateProfile(auth.currentUser, { displayName: name });
-        await updateAddress();
+
+        await updateAddress(cep, rua, bairro, estado, cidade, complemento);
         sessionStorage.setItem("@AuthFirebase:user", JSON.stringify(auth.currentUser));
-        navigate('/');
+        navigate('/profile');
     }
 
-    async function updateAddress() {
-        if (!cep && !rua && !bairro && !estado && !cidade) {
+    async function updateAddress(cep, rua, bairro, estado, cidade, complemento) {
+        if (cep === "" && rua === "" && bairro === "" && estado === "" && cidade === "") {
             return;
         }
 
@@ -104,19 +75,19 @@ export const Profile = () => {
 
         await deleteDoc(doc(db, "address", userLogado.uid));
         await deleteDoc(doc(db, "users", userLogado.uid));
-
     }
 
     function checkCep(e) {
+
         const cep = e.target.value.replace(/\D/g, '');
         fetch(`https://viacep.com.br/ws/${cep}/json/`)
             .then(res => res.json()).then(data => {
-                setRua(data.logradouro);
-                setBairro(data.bairro);
-                setCidade(data.localidade);
-                setEstado(data.uf);
+                setValue("rua", data.logradouro);
+                setValue("bairro", data.bairro);
+                setValue("cidade", data.localidade);
+                setValue("estado", data.uf);
 
-                document.querySelector('#complemento').focus();
+                setFocus("complemento");
             });
     }
 
@@ -131,22 +102,25 @@ export const Profile = () => {
         async function retrieveUserData() {
             const userDoc = doc(db, 'users', userLogado.uid);
             const userData = (await getDoc(userDoc)).data();
-            if (phone === null) setPhone(userData.phone);
-            if (birthday === 'dd/mm/aaaa') setBirthday(userData.birthday);
-            if (cpf === null) setCpf(userData.cpf);
-
+            setValue("name", userLogado.displayName);
+            setValue("email", userLogado.email);
+            setValue("birthday", userData.birthday);
+            setValue("cpf", userData.cpf);
+            setValue("phone", userData.phone);
         }
 
         async function retrieveUserAddress() {
             const userAddressDoc = doc(db, 'address', userLogado.uid);
             const userAddress = (await getDoc(userAddressDoc)).data();
 
-            if (cep === null) setCep(userAddress.cep);
-            if (rua === null) setRua(userAddress.rua);
-            if (complemento === null) setComplemento(userAddress.complemento);
-            if (bairro === null) setBairro(userAddress.bairro);
-            if (estado === null) setEstado(userAddress.estado);
-            if (cidade === null) setCidade(userAddress.cidade);
+            if (userAddress) {
+                setValue("cep", userAddress.cep);
+                setValue("rua", userAddress.rua);
+                setValue("complemento", userAddress.complemento);
+                setValue("bairro", userAddress.bairro);
+                setValue("estado", userAddress.estado);
+                setValue("cidade", userAddress.cidade);
+            }
         }
 
         if (signed) {
@@ -156,7 +130,7 @@ export const Profile = () => {
         } else {
             navigate('/');
         }
-    }, [navigate, userLogado, phone, birthday, cpf, signed])
+    }, [navigate, userLogado, signed, setValue])
 
 
     return (
@@ -175,77 +149,135 @@ export const Profile = () => {
                 <main className="col-md-9 ms-sm-auto col-lg-10 px-md-4 ">
                     <h2 className='h2 pt-4'>Minha conta</h2>
                     <hr />
-                    <div className="row">
-                        <div className="col-md-5" style={{ borderRight: '1px solid #ebebeb' }}>
-                            <h3 className="h3">
-                                <FontAwesomeIcon icon={faUser} /> Dados pessoais</h3>
+                    <form onSubmit={handleSubmit(onSubmit)}>
+                        <div className="row">
+                            <div className="col-md-5" style={{ borderRight: '1px solid #ebebeb' }}>
+                                <h3 className="h3">
+                                    <FontAwesomeIcon icon={faUser} /> Dados pessoais</h3>
 
-                            <form className='form-signin w-100 m-auto text-center'>
+                                <div className='form-signin w-100 m-auto text-center'>
 
-                                <div className="form-floating">
-                                    <input value={name} name="name" type="text" id="floatingInput1" className="form-control" placeholder='Name' onChange={handleName} />
-                                    <label htmlFor="floatingInput1">Nome</label>
-                                </div>
+                                    <div className="form-floating">
+                                        <input type="text" id="name" name='name' className="form-control"  {...register('name')} />
+                                        <label htmlFor="name">Nome</label>
 
-                                <div className="form-floating">
-                                    <input value={email} name="email" type="email" disabled id="floatingInput1" className="form-control" placeholder='example@example.com' />
-                                    <label htmlFor="floatingInput1">Endereço de e-mail</label>
-                                </div>
+                                        <p className='error-message'>{errors.name?.message}</p>
+                                    </div>
 
-                                <div className="form-floating">
-                                    <input value={phone} name="phone" type="text" id="floatingInput7" className="form-control" placeholder='Telefone' onChange={handlePhone} />
-                                    <label htmlFor="floatingInput7">Telefone</label>
-                                </div>
-                                <div className="form-floating">
-                                    <input value={birthday} name="birthday" type="date" id="floatingInput8" className="form-control" placeholder='Data de nascimento' onChange={handleBirthday} />
-                                    <label htmlFor="floatingInput8">Data de nascimento</label>
-                                </div>
-                                <div className="form-floating">
-                                    <input value={cpf} name="cpf" type="text" id="floatingInput9" className="form-control" placeholder='CPF' onChange={handleCpf} />
-                                    <label htmlFor="floatingInput9">CPF</label>
-                                </div>
+                                    <div className="form-floating">
+                                        <input type="email" name="email" id="email" className="form-control" disabled {...register('email')} />
+                                        <label htmlFor="email">Endereço de e-mail</label>
+                                        <p className='error-message'>{errors.email?.message}</p>
+                                    </div>
 
-                            </form>
+                                    <div className="form-floating">
+                                        <Controller
+                                            name="phone"
+                                            control={control}
+                                            defaultValue=""
+                                            rules={{
+                                                required: true,
+                                            }}
+                                            id="phone"
+                                            className="form-control"
+                                            render={({ field }) => (
+                                                <InputMask
+                                                    mask="(99)99999-9999"
+                                                    maskChar="_"
+                                                    value={field.value}
+                                                    onChange={field.onChange}
+                                                >
+                                                    {(inputProps) => (
+                                                        <input
+                                                            className="form-control"
+                                                            {...inputProps}
+                                                            type="text"
+                                                        />
+                                                    )}
+                                                </InputMask>
+                                            )}
+                                        />
+                                        <label htmlFor="phone">Telefone com DDD</label>
+                                        <p className='error-message'>{errors.phone?.message}</p>
+
+                                    </div>
+                                    <div className="form-floating">
+                                        <input type="date" id="birthday" name="birthday" className="form-control" placeholder='Data de nascimento' max="2999-12-31" {...register('birthday')} />
+                                        <label htmlFor="birthday">Data de nascimento</label>
+                                        <p className='error-message'>{errors.birthday?.message}</p>
+                                    </div>
+                                    <div className="form-floating">
+                                        <Controller
+                                            name="cpf"
+                                            control={control}
+                                            defaultValue=""
+                                            rules={{
+                                                required: true,
+                                            }}
+                                            id="cpf"
+                                            className="form-control"
+                                            render={({ field }) => (
+                                                <InputMask
+                                                    mask="999.999.999-99"
+                                                    maskChar="_"
+                                                    value={field.value}
+                                                    onChange={field.onChange}
+                                                >
+                                                    {(inputProps) => (
+                                                        <input
+                                                            className="form-control"
+                                                            {...inputProps}
+                                                            type="text"
+                                                        />
+                                                    )}
+                                                </InputMask>
+                                            )}
+                                        />
+                                        <label htmlFor="cpf">CPF</label>
+                                        <p className='error-message'>{errors.cpf?.message}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="col-md-5">
+                                <h3 className="h3">
+                                    <FontAwesomeIcon icon={faLocationDot} /> Endereço</h3>
+
+                                <div className='form-signin w-100 m-auto text-center'>
+
+                                    <div className="form-floating">
+                                        <input type="text" id="cep" name="cep" className="form-control" placeholder='CEP'{...register("cep")} onBlur={checkCep} />
+                                        <label htmlFor="cep">CEP</label>
+                                    </div>
+                                    <div className="form-floating">
+                                        <input type="text" id="rua" name="rua" className="form-control" placeholder='Rua'{...register("rua")} />
+                                        <label htmlFor="rua">Rua</label>
+                                    </div>
+                                    <div className="form-floating">
+                                        <input type="text" id="complemento" name="complemento" className="form-control" placeholder='Complemento' {...register("complemento")} />
+                                        <label htmlFor="complemento">Complemento</label>
+                                    </div>
+                                    <div className="form-floating">
+                                        <input type="text" id="bairro" name="bairro" className="form-control" placeholder='Bairro' {...register("bairro")} />
+                                        <label htmlFor="bairro">Bairro</label>
+                                    </div>
+                                    <div className="form-floating">
+                                        <input type="text" id="estado" name="estado" className="form-control" placeholder='Estado' {...register("estado")} />
+                                        <label htmlFor="estado">Estado</label>
+                                    </div>
+                                    <div className="form-floating">
+                                        <input type="text" id="cidade" name="cidade" className="form-control" placeholder='Cidade' {...register("cidade")} />
+                                        <label htmlFor="cidade">Cidade</label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div className="col-md-5">
-                            <h3 className="h3">
-                                <FontAwesomeIcon icon={faLocationDot} /> Endereço</h3>
-
-                            <form className='form-signin w-100 m-auto text-center'>
-
-                                <div className="form-floating">
-                                    <input value={cep} type="text" id="floatingInput2" className="form-control" placeholder='CEP' onBlur={checkCep} onChange={handleCep} />
-                                    <label htmlFor="floatingInput2">CEP</label>
-                                </div>
-                                <div className="form-floating">
-                                    <input value={rua} type="text" id="floatingInput3" className="form-control" placeholder='Rua' onChange={handleRua} />
-                                    <label htmlFor="floatingInput3">Rua</label>
-                                </div>
-                                <div className="form-floating">
-                                    <input value={complemento} type="text" id="complemento" className="form-control" placeholder='Complemento' onChange={handleComplemento} />
-                                    <label htmlFor="complemento">Complemento</label>
-                                </div>
-                                <div className="form-floating">
-                                    <input value={bairro} type="text" id="floatingInput5" className="form-control" placeholder='Bairro' onChange={handleBairro} />
-                                    <label htmlFor="floatingInput5">Bairro</label>
-                                </div>
-                                <div className="form-floating">
-                                    <input value={estado} type="text" id="floatingInput7" className="form-control" placeholder='Estado' onChange={handleEstado} />
-                                    <label htmlFor="floatingInput7">Estado</label>
-                                </div>
-                                <div className="form-floating">
-                                    <input value={cidade} type="text" id="floatingInput6" className="form-control" placeholder='Cidade' onChange={handleCidade} />
-                                    <label htmlFor="floatingInput6">Cidade</label>
-                                </div>
-                            </form>
+                        <div className="container row d-flex justify-content-between pt-5">
+                            <button type="submit" className='btn btn-success col-md-4' style={{ marginTop: '15px' }}>
+                                <FontAwesomeIcon icon={faSave} /> Salvar alterações</button>
+                            <button data-bs-toggle="modal" data-bs-target="#modal" type="button" className='btn btn-danger col-md-3' style={{ marginTop: '15px' }}>
+                                <FontAwesomeIcon icon={faTrash} /> Deletar meu perfil</button>
                         </div>
-                    </div>
-                    <div className="container row d-flex justify-content-between pt-5">
-                        <button onClick={updateUserData} type="button" className='btn btn-success col-md-4' style={{ marginTop: '15px' }}>
-                            <FontAwesomeIcon icon={faSave} /> Salvar alterações</button>
-                        <button data-bs-toggle="modal" data-bs-target="#modal" type="button" className='btn btn-danger col-md-3' style={{ marginTop: '15px' }}>
-                            <FontAwesomeIcon icon={faTrash} /> Deletar meu perfil</button>
-                    </div>
+                    </form>
                     <Modal
                         title={"Tem certeza que deseja excluir o seu perfil?"}
                         textBody={"Essa ação não poderá ser desfeita!"}
