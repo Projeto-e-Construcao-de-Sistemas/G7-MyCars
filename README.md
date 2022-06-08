@@ -3,9 +3,9 @@ MyCars é um site de intermediação de venda de carros novos, seminovos ou usad
 
 ## Organização de diretórios
 .
-├── MyCars               # Arquivos de código do projeto
-├── documentation        # Arquivos de documentação do projeto
-├── entregas             # Arquivos em PDF com as entregas realizadas
+├── MyCars                   # Arquivos de código do projeto
+├── documentation                    # Arquivos de documentação do projeto
+├── entregas                     # Arquivos em PDF com as entregas realizadas
 ├── LICENSE
 └── README.md
 
