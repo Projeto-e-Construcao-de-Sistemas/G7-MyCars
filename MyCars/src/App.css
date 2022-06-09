@@ -1,8 +1,47 @@
 .App {
   text-align: center;
 }
+
+#light {
+  background-color: #fff;
+}
+
+#dark {
+  background-color: #292929;
+}
+
+#dark .card.h-100{
+  background-color: #1d1d1d;
+  color: #E0E0E0;
+}
+
+#dark span {
+  color: #E0E0E0;
+}
+
+#dark main{
+  background-color: #1d1d1d;
+  color: #E0E0E0;
+}
+
+#dark input{
+  background-color: #292929;
+  color: #fff;
+}
+
+#dark header{
+  background-color: #292929;
+}
+
+#dark a{
+  color: #E0E0E0;
+}
+
+#dark label{
+  color: #E0E0E0;
+}
+
 body{
   padding: 0%;
   margin: 0%;
-
 }
