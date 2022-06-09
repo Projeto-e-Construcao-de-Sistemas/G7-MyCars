@@ -135,7 +135,7 @@ export const Profile = () => {
 
     return (
         <div className="root">
-            <header className='navbar navbar-light sticky-top bg-light flex-md-nowrap p-0 shadow'>
+            <header className='navbar navbar-light sticky-top flex-md-nowrap p-0 shadow'>
                 <Link to="/" className='navbar-brand col-md-3 col-lg-2 me-0 px-3 '>MyCars</Link>
                 <div className="navbar-nav">
                     <div className="nav-item text-nowrap">

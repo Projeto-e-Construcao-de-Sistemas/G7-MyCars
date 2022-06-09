@@ -17,7 +17,7 @@ export const Sidebar = () => {
     }
 
     return (
-        <nav id="sidebarMenu" className='col-md-3 col-lg-2 d-md-block bg-light sidebar collapse'>
+        <nav id="sidebarMenu" className='col-md-3 col-lg-2 d-md-block sidebar collapse'>
             <div className="position-sticky pt-3">
                 <ul className="nav flex-column">
                     <li className="nav-item">
@@ -39,6 +39,11 @@ export const Sidebar = () => {
                     <li className="nav-item">
                         <Link to="#" className='nav-link'>
                             <FontAwesomeIcon icon={faCommentDollar} /> Minhas negociações</Link>
+                    </li>
+                    <li className='nav-item' >
+                        <input type="checkbox" id="theme"></input>
+                        <label for="theme"> Modo Escuro
+                        </label>
                     </li>
                     <li className="nav-item">
                         <Link to="#" onClick={signOut} className='nav-link'>
