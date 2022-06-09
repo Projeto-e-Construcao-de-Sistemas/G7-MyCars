@@ -1,0 +1,16 @@
+.search{
+    position: relative;
+}
+
+.search input{
+    height: 60px;
+    text-indent: 25px;
+}
+
+
+
+.search .fa-search{
+    position: absolute;
+    top: 20px;
+    left: 16px;
+}
