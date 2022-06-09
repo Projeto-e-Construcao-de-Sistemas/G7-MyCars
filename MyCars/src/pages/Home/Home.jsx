@@ -20,8 +20,6 @@ export const Home = () => {
 
   const navigate = useNavigate();
 
-  let [announces] = useState([]);
-
   useEffect(() => {
     function checkUserHasPassword() {
       if (!userLogado) return;
