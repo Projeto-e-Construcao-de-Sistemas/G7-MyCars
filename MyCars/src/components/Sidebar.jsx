@@ -4,16 +4,29 @@ import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './sidebar.css';
 import { AuthenticationContext } from '../context/authenticationContext';
+import { useState } from 'react';
+import { ThemeContext } from '../App';
+import { useEffect } from 'react';
 
 export const Sidebar = () => {
 
     const { signOutFromApp } = useContext(AuthenticationContext);
+    const {toggleTheme} = useContext(ThemeContext);
+
+
+    const [darkMode, setDarkMode] = useState(localStorage.getItem("theme") === "dark");
     const navigate = useNavigate();
 
 
     async function signOut() {
         await signOutFromApp();
         navigate("/login");
+    }
+
+
+    function changeTheme(){
+        toggleTheme();
+        setDarkMode(localStorage.getItem("theme") === "dark");
     }
 
     return (
@@ -41,7 +54,7 @@ export const Sidebar = () => {
                             <FontAwesomeIcon icon={faCommentDollar} /> Minhas negociações</Link>
                     </li>
                     <li className='nav-item' >
-                        <input type="checkbox" id="theme"></input>
+                        <input type="checkbox" id="theme" checked={darkMode} onClick={changeTheme}/>
                         <label for="theme"> Modo Escuro
                         </label>
                     </li>

@@ -8,19 +8,21 @@ import React, { createContext, useState } from 'react';
 export const ThemeContext = createContext(null);
 
 function App() {
-  const [theme, setTheme] = useState("light");
+  localStorage.setItem("theme", (!localStorage.getItem("theme")) ? "light" : localStorage.getItem("theme"));
+  const [theme, setTheme] = useState(localStorage.getItem("theme"));
 
   const toggleTheme = () => {
-    setTheme((curr) => (curr === "light" ? "dark" : "light"))
+    setTheme((curr) => (curr === "dark" ? "light"  : "dark"));
+    localStorage.setItem("theme", (theme=== "light" ? "dark" : "light"));
   }
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       <div className='App' id={theme}>
-      <AuthenticationProvider>
-        <AppRoutes />
-      </AuthenticationProvider>
-      </div>  
+        <AuthenticationProvider>
+          <AppRoutes />
+        </AuthenticationProvider>
+      </div>
     </ThemeContext.Provider>
 
   );
