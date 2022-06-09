@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/G7-MyCars/static/css/main.6e5f519e.css",
+    "main.js": "/G7-MyCars/static/js/main.47c859af.js",
+    "index.html": "/G7-MyCars/index.html",
+    "main.6e5f519e.css.map": "/G7-MyCars/static/css/main.6e5f519e.css.map",
+    "main.47c859af.js.map": "/G7-MyCars/static/js/main.47c859af.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.6e5f519e.css",
+    "static/js/main.47c859af.js"
+  ]
+}
