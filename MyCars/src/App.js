@@ -11,6 +11,7 @@ function App() {
   localStorage.setItem("theme", (!localStorage.getItem("theme")) ? "light" : localStorage.getItem("theme"));
   const [theme, setTheme] = useState(localStorage.getItem("theme"));
 
+  document.body.id = theme;
   const toggleTheme = () => {
     setTheme((curr) => (curr === "dark" ? "light"  : "dark"));
     const themeInverted = (theme=== "light") ? "dark" : "light";

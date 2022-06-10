@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { CACHE_SIZE_UNLIMITED, enableIndexedDbPersistence, getFirestore, initializeFirestore } from 'firebase/firestore';
+import {  getFirestore } from 'firebase/firestore';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 
 const firebaseConfig = {
