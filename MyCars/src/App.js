@@ -13,7 +13,9 @@ function App() {
 
   const toggleTheme = () => {
     setTheme((curr) => (curr === "dark" ? "light"  : "dark"));
-    localStorage.setItem("theme", (theme=== "light" ? "dark" : "light"));
+    const themeInverted = (theme=== "light") ? "dark" : "light";
+    localStorage.setItem("theme", themeInverted);
+    document.body.id = themeInverted;
   }
 
   return (

@@ -7,14 +7,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch } from '@fortawesome/free-solid-svg-icons';
 
 import './home.css';
-import { collection, doc, getDocs } from 'firebase/firestore';
+import { collection, disableNetwork, doc, getDocs, getDocsFromServer, onSnapshot, query } from 'firebase/firestore';
 import { db } from '../../services/firebaseConfig';
 
 export const Home = () => {
 
   const { signed } = useContext(AuthenticationContext);
   const userLogado = JSON.parse(sessionStorage.getItem("@AuthFirebase:user"));
-  const announcementsCollectionRef = collection(db, "announcement");
+  
 
   const [announcements, setAnnouncements] = useState([]);
 
@@ -29,9 +29,11 @@ export const Home = () => {
       }
     }
 
-    async function getAnnouncements(){
-      const data = await(getDocs(announcementsCollectionRef));
-      setAnnouncements(data.docs.map((doc) => ({...doc.data(), id: doc.id})));
+    function getAnnouncements() {
+      onSnapshot(collection(db, "announcement"), (snapshot)=>{
+        setAnnouncements(snapshot.docs.map((doc) => ({...doc.data(), id: doc.id})));
+      });
+  
     }
   
     getAnnouncements();
@@ -42,13 +44,11 @@ export const Home = () => {
   }, [navigate, userLogado, signed]);
 
 
-
-  
   return (
     <div className='root'>
       <Navbar current="home" />
       <div className="container">
-        
+
         <div className='d-flex justify-content-center pt-3'>
           <div className="search col-sm-10 ">
             <FontAwesomeIcon icon={faSearch} className="fa-search" />
