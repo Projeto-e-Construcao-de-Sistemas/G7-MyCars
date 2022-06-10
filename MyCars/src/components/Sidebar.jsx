@@ -26,12 +26,16 @@ export const Sidebar = () => {
         setDarkMode(localStorage.getItem("theme") === "dark");
     }
 
+    const baseUrl = process.env.PUBLIC_URL+"/";
+    const enviromnent = process.env.NODE_ENV;
+    const basePath = (enviromnent === "production") ? baseUrl : "/";
+
     return (
         <nav id="sidebarMenu" className='col-md-3 col-lg-2 d-md-block sidebar collapse' style={{textAlign:"center"}}>
             <div className="position-sticky pt-3">
                 <ul className="nav flex-column">
                     <li className="nav-item">
-                        <Link to="/" className='nav-link'>
+                        <Link to={basePath+"/"} className='nav-link'>
                             <FontAwesomeIcon icon={faMagnifyingGlass} /> Buscar veículos</Link>
                     </li>
                     <li className="nav-item">

@@ -16,6 +16,10 @@ import './createAccount.css';
 export const CreateAccount = () => {
     const { signed, createUserEmailPassword, signInGoogle } = useContext(AuthenticationContext);
 
+    const baseUrl = process.env.PUBLIC_URL+"/";
+    const enviromnent = process.env.NODE_ENV;
+    const basePath = (enviromnent === "production") ? baseUrl : "/";
+
     const schema = yup.object({
         name: yup.string().required("Por favor, preencha o campo nome."),
         email: yup.string().email('Digite um e-mail válido').required('Por favor, preencha o campo e-mail.'),
@@ -35,7 +39,7 @@ export const CreateAccount = () => {
     }
 
     if (signed) {
-        return <Navigate to="/" />;
+        return <Navigate to={basePath} />;
     }
 
     async function onSubmit(user) {

@@ -22,6 +22,10 @@ export const Profile = () => {
     const { signed, signOutFromApp } = useContext(AuthenticationContext);
     const userLogado = JSON.parse(sessionStorage.getItem("@AuthFirebase:user"));
 
+    const baseUrl = process.env.PUBLIC_URL+"/";
+    const enviromnent = process.env.NODE_ENV;
+    const basePath = (enviromnent === "production") ? baseUrl : "/";
+
     const navigate = useNavigate();
 
     const schema = yup.object({
@@ -47,7 +51,7 @@ export const Profile = () => {
 
         await updateAddress(cep, rua, bairro, estado, cidade, complemento);
         sessionStorage.setItem("@AuthFirebase:user", JSON.stringify(auth.currentUser));
-        navigate('/profile');
+        navigate(basePath+'profile');
     }
 
     async function updateAddress(cep, rua, bairro, estado, cidade, complemento) {
@@ -95,7 +99,7 @@ export const Profile = () => {
         function checkUserHasPassword() {
             const providerData = userLogado.providerData;
             if (providerData.length === 1 && providerData[0].providerId === 'google.com') {
-                navigate("/completeAccount");
+                navigate(basePath+"completeAccount");
             }
         }
 
@@ -129,7 +133,7 @@ export const Profile = () => {
             retrieveUserData();
             retrieveUserAddress();
         } else {
-            navigate('/');
+            navigate(basePath);
         }
     }, [navigate, userLogado, signed, setValue])
 
@@ -137,10 +141,10 @@ export const Profile = () => {
     return (
         <div className="root">
             <header className='navbar navbar-light sticky-top flex-md-nowrap p-0 shadow'>
-                <Link to="/" className='navbar-brand col-md-3 col-lg-2 me-0 px-3 '>MyCars</Link>
+                <Link to={basePath} className='navbar-brand col-md-3 col-lg-2 me-0 px-3 '>MyCars</Link>
                 <div className="navbar-nav">
                     <div className="nav-item text-nowrap">
-                        <Link to="/" className="nav-link px-3">{userLogado.displayName}</Link>
+                        <Link to={basePath} className="nav-link px-3">{userLogado.displayName}</Link>
                     </div>
                 </div>
             </header>
