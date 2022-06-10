@@ -7,17 +7,20 @@ import { Profile } from '../pages/Profile/Profile';
 import { PrivateRoutes } from '.';
 
 export const AppRoutes = () => {
+    const baseUrl = process.env.PUBLIC_URL+"/";
+    const enviromnent = process.env.NODE_ENV;
+    const basePath = (enviromnent === "production") ? baseUrl : "/";
     return (
         <BrowserRouter>
             <Routes>
-                <Route index path="/" element={<Home />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/createAccount" element={<CreateAccount />} />
+                <Route index path={basePath} element={<Home />} />
+                <Route path={basePath+"login"} element={<Login />} />
+                <Route path={basePath+"createAccount"} element={<CreateAccount />} />
 
-                <Route path="/profile" element={<PrivateRoutes />}>
-                    <Route path="/profile" element={<Profile />} />
+                <Route path={basePath+"profile"} element={<PrivateRoutes />}>
+                    <Route path={basePath+"profile"} element={<Profile />} />
                 </Route>
-                <Route path="/completeAccount" element={<CompleteAccount />} />
+                <Route path={basePath+"completeAccount"} element={<CompleteAccount />} />
 
             </Routes>
         </BrowserRouter>

@@ -21,6 +21,10 @@ export const AuthenticationContext = createContext({});
 export const AuthenticationProvider = ({ children }) => {
     const [user, setUser] = useState(null);
 
+    const baseUrl = process.env.PUBLIC_URL+"/";
+    const enviromnent = process.env.NODE_ENV;
+    const basePath = (enviromnent === "production") ? baseUrl : "/";
+
     useEffect(() => {
         const loadStoreAuth = () => {
             const sessionToken = sessionStorage.getItem("@AuthFirebase:token");
@@ -65,7 +69,7 @@ export const AuthenticationProvider = ({ children }) => {
                         sessionStorage.setItem("@AuthFirebase:token", token);
                         sessionStorage.setItem("@AuthFirebase:user", JSON.stringify(user));
 
-                        return <Navigate to="/login" />
+                        return <Navigate to={basePath+"login"} />
                     });
                 }).catch((err) => console.log(err));
 
@@ -108,7 +112,7 @@ export const AuthenticationProvider = ({ children }) => {
 
             setUser(usercred.user);
             sessionStorage.setItem("@AuthFirebase:user", JSON.stringify(usercred.user));
-            return <Navigate to="/" />;
+            return <Navigate to={basePath} />;
         } catch (err) {
             console.log(err);
         }
@@ -119,10 +123,10 @@ export const AuthenticationProvider = ({ children }) => {
             sessionStorage.clear();
             setUser(null);
 
-            return <Navigate to="/login" />
+            return <Navigate to={basePath+"/login"} />
         }).catch((error) => {
             console.log(error);
-            return <Navigate to="/" />
+            return <Navigate to={basePath} />
         });
     }
 

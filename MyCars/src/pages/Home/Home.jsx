@@ -7,7 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch } from '@fortawesome/free-solid-svg-icons';
 
 import './home.css';
-import { collection, disableNetwork, doc, getDocs, getDocsFromServer, onSnapshot, query } from 'firebase/firestore';
+import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../../services/firebaseConfig';
 
 export const Home = () => {
@@ -15,6 +15,9 @@ export const Home = () => {
   const { signed } = useContext(AuthenticationContext);
   const userLogado = JSON.parse(sessionStorage.getItem("@AuthFirebase:user"));
   
+  const baseUrl = process.env.PUBLIC_URL+"/";
+  const enviromnent = process.env.NODE_ENV;
+  const basePath = (enviromnent === "production") ? baseUrl : "/";
 
   const [announcements, setAnnouncements] = useState([]);
 
@@ -25,7 +28,7 @@ export const Home = () => {
       if (!userLogado) return;
       const providerData = userLogado.providerData;
       if (providerData.length === 1 && providerData[0].providerId === 'google.com') {
-        navigate("/completeAccount");
+        navigate(basePath+"completeAccount");
       }
     }
 
@@ -35,7 +38,7 @@ export const Home = () => {
       });
   
     }
-  
+
     getAnnouncements();
 
     if (signed) {

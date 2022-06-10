@@ -13,6 +13,10 @@ export const CompleteAccount = () => {
     const { linkCredentials, signed } = useContext(AuthenticationContext);
     const navigate = useNavigate();
 
+    const baseUrl = process.env.PUBLIC_URL+"/";
+    const enviromnent = process.env.NODE_ENV;
+    const basePath = (enviromnent === "production") ? baseUrl : "/";
+
     const schema = yup.object({
         name: yup.string().required("Por favor, preencha o campo nome."),
         email: yup.string().email('Digite um e-mail válido').required('Por favor, preencha o campo e-mail.'),
@@ -30,7 +34,7 @@ export const CompleteAccount = () => {
         const user = JSON.parse(sessionStorage.getItem("@AuthFirebase:user"));
         const providerData = user.providerData;
         if (providerData.length === 2) {
-            window.location.href = "/profile";
+            window.location.href = basePath+"profile";
         }
     }
 
@@ -45,7 +49,7 @@ export const CompleteAccount = () => {
             checkUserHasPassword();
             completeFields();
         } else {
-            navigate('/');
+            navigate(basePath);
         }
 
     }, [navigate, signed, setValue]);
@@ -53,7 +57,7 @@ export const CompleteAccount = () => {
     async function onSubmit(user) {
         const { password, name, phone, birthday, cpf } = user;
         linkCredentials(password, name, phone, birthday, cpf).then(() => {
-            navigate("/");
+            navigate(basePath);
         });
     }
 

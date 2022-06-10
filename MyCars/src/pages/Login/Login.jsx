@@ -23,8 +23,12 @@ export const Login = () => {
         await signInEmailPassword(email, password);
     }
 
+    const baseUrl = process.env.PUBLIC_URL+"/";
+    const enviromnent = process.env.NODE_ENV;
+    const basePath = (enviromnent === "production") ? baseUrl : "/";
+
     if (signed) {
-        return <Navigate to="/" />;
+        return <Navigate to={basePath} />;
     }
 
     return (
@@ -49,7 +53,7 @@ export const Login = () => {
                         <h4 className="h4 mb-3 fw-normal" style={{marginTop:'30px', marginBottom:'30px'}}>Ou entre com sua conta Google</h4>
                         <button type="button" className="w-100 btn btn-lg btn-outline-primary" onClick={loginGoogle}><FontAwesomeIcon icon={faG} /> Entrar com Google</button>
                     </form>
-                    <Link to="/createAccount" className='nav-link'>Não tem uma conta? Cadastre-se gratuitamente!</Link>
+                    <Link to={basePath+"createAccount"} className='nav-link'>Não tem uma conta? Cadastre-se gratuitamente!</Link>
                 </main>
             </div>
         </div>
