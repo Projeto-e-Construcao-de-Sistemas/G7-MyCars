@@ -79,6 +79,7 @@ export const Profile = () => {
 
         await deleteDoc(doc(db, "address", userLogado.uid));
         await deleteDoc(doc(db, "users", userLogado.uid));
+        signOutFromApp();
     }
 
     function checkCep(e) {
