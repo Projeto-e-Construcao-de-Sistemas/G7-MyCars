@@ -100,6 +100,7 @@ export const Profile = () => {
         }
 
         async function retrieveUserData() {
+           
             const userDoc = doc(db, 'users', userLogado.uid);
             const userData = (await getDoc(userDoc)).data();
             setValue("name", userLogado.displayName);

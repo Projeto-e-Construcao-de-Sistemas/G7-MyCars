@@ -6,31 +6,28 @@ import './sidebar.css';
 import { AuthenticationContext } from '../context/authenticationContext';
 import { useState } from 'react';
 import { ThemeContext } from '../App';
-import { useEffect } from 'react';
 
 export const Sidebar = () => {
 
     const { signOutFromApp } = useContext(AuthenticationContext);
-    const {toggleTheme} = useContext(ThemeContext);
+    const { toggleTheme } = useContext(ThemeContext);
 
 
     const [darkMode, setDarkMode] = useState(localStorage.getItem("theme") === "dark");
     const navigate = useNavigate();
-
 
     async function signOut() {
         await signOutFromApp();
         navigate("/login");
     }
 
-
-    function changeTheme(){
+    function changeTheme() {
         toggleTheme();
         setDarkMode(localStorage.getItem("theme") === "dark");
     }
 
     return (
-        <nav id="sidebarMenu" className='col-md-3 col-lg-2 d-md-block sidebar collapse'>
+        <nav id="sidebarMenu" className='col-md-3 col-lg-2 d-md-block sidebar collapse' style={{textAlign:"center"}}>
             <div className="position-sticky pt-3">
                 <ul className="nav flex-column">
                     <li className="nav-item">
@@ -54,9 +51,11 @@ export const Sidebar = () => {
                             <FontAwesomeIcon icon={faCommentDollar} /> Minhas negociações</Link>
                     </li>
                     <li className='nav-item' >
-                        <input type="checkbox" id="theme" checked={darkMode} onClick={changeTheme}/>
-                        <label for="theme"> Modo Escuro
-                        </label>
+                        <div class="form-check form-switch nav-link">
+                            <input style={{float:'inherit', marginRight:'10px'}} className="form-check-input" type="checkbox" id="flexSwitchCheckDefault" checked={darkMode} onClick={changeTheme} />
+                            <label className="form-check-label" for="flexSwitchCheckDefault"> Modo escuro</label>
+                        </div>
+
                     </li>
                     <li className="nav-item">
                         <Link to="#" onClick={signOut} className='nav-link'>
