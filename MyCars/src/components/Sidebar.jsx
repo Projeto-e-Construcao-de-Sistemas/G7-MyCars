@@ -16,19 +16,19 @@ export const Sidebar = () => {
     const [darkMode, setDarkMode] = useState(localStorage.getItem("theme") === "dark");
     const navigate = useNavigate();
 
+    const baseUrl = process.env.PUBLIC_URL+"/";
+    const enviromnent = process.env.NODE_ENV;
+    const basePath = (enviromnent === "production") ? baseUrl : "/";
+
     async function signOut() {
         await signOutFromApp();
-        navigate("/login");
+        navigate(basePath+"login");
     }
 
     function changeTheme() {
         toggleTheme();
         setDarkMode(localStorage.getItem("theme") === "dark");
     }
-
-    const baseUrl = process.env.PUBLIC_URL+"/";
-    const enviromnent = process.env.NODE_ENV;
-    const basePath = (enviromnent === "production") ? baseUrl : "/";
 
     return (
         <nav id="sidebarMenu" className='col-md-3 col-lg-2 d-md-block sidebar collapse' style={{textAlign:"center"}}>
