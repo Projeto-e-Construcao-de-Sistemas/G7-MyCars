@@ -31,6 +31,8 @@ Instala as dependências necessárias ao projeto
 ### `npm run dev`
 Inicia o servidor em modo de desenvolvimento
 
+Observação: Você precisará editar o arquivo .env dentro do diretório MyCars/ com as variáveis de ambiente do seu proejto firebase para que o projeto funcione corretamente.
+
 ## Contribuindo para o projeto
 Caso queira contribuir, sinta-se livre para criar um issue ou um pull request ;)
 
