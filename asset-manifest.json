@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/G7-MyCars/static/css/main.c4687ebd.css",
-    "main.js": "/G7-MyCars/static/js/main.e5c08c6a.js",
+    "main.js": "/G7-MyCars/static/js/main.bd4c914c.js",
     "index.html": "/G7-MyCars/index.html",
     "main.c4687ebd.css.map": "/G7-MyCars/static/css/main.c4687ebd.css.map",
-    "main.e5c08c6a.js.map": "/G7-MyCars/static/js/main.e5c08c6a.js.map"
+    "main.bd4c914c.js.map": "/G7-MyCars/static/js/main.bd4c914c.js.map"
   },
   "entrypoints": [
     "static/css/main.c4687ebd.css",
-    "static/js/main.e5c08c6a.js"
+    "static/js/main.bd4c914c.js"
   ]
 }
