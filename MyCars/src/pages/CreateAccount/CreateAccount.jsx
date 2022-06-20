@@ -16,6 +16,10 @@ import './createAccount.css';
 export const CreateAccount = () => {
     const { signed, createUserEmailPassword, signInGoogle } = useContext(AuthenticationContext);
 
+    const baseUrl = process.env.PUBLIC_URL + "/";
+    const enviromnent = process.env.NODE_ENV;
+    const basePath = (enviromnent === "production") ? baseUrl : "/";
+
     const schema = yup.object({
         name: yup.string().required("Por favor, preencha o campo nome."),
         email: yup.string().email('Digite um e-mail válido').required('Por favor, preencha o campo e-mail.'),
@@ -35,12 +39,15 @@ export const CreateAccount = () => {
     }
 
     if (signed) {
-        return <Navigate to="/" />;
+        return <Navigate to={basePath} />;
     }
 
     async function onSubmit(user) {
-        const {email, password, name, phone, birthday, cpf} = user;
-        await createUserEmailPassword(email, password, name, phone, birthday, cpf);
+        const { email, password, name, phone, birthday, cpf } = user;
+        const success = await createUserEmailPassword(email, password, name, phone, birthday, cpf);
+        if (!success) {
+            document.querySelector('.alert').classList.remove('hidden');
+        }
     }
 
     return (
@@ -50,6 +57,10 @@ export const CreateAccount = () => {
                 <main className='form-signin w-100 m-auto text-center card'>
                     <form onSubmit={handleSubmit(onSubmit)}>
                         <h1 className="h3 mb-3 fw-normal">Cadastre-se gratuitamente!</h1>
+
+                        <div className="alert alert-danger hidden">
+                            Esse email já está em uso.
+                        </div>
 
                         <div className="form-floating">
                             <input type="text" id="name" name='name' className="form-control"  {...register('name')} />

@@ -12,6 +12,11 @@ body {
     /* border: 1px solid ; */
   }
   
+  input:invalid {
+    border: 3px solid red !important;
+  }
+  
+
   main{
     height: 100vh;
   }
@@ -141,3 +146,5 @@ body {
       color: red;
       text-align: left;
     }
+
+    

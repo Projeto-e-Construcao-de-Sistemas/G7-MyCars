@@ -22,6 +22,10 @@ export const Profile = () => {
     const { signed, signOutFromApp } = useContext(AuthenticationContext);
     const userLogado = JSON.parse(sessionStorage.getItem("@AuthFirebase:user"));
 
+    const baseUrl = process.env.PUBLIC_URL + "/";
+    const enviromnent = process.env.NODE_ENV;
+    const basePath = (enviromnent === "production") ? baseUrl : "/";
+
     const navigate = useNavigate();
 
     const schema = yup.object({
@@ -47,7 +51,7 @@ export const Profile = () => {
 
         await updateAddress(cep, rua, bairro, estado, cidade, complemento);
         sessionStorage.setItem("@AuthFirebase:user", JSON.stringify(auth.currentUser));
-        navigate('/profile');
+        document.querySelector('.alert').classList.remove('hidden');
     }
 
     async function updateAddress(cep, rua, bairro, estado, cidade, complemento) {
@@ -75,6 +79,8 @@ export const Profile = () => {
 
         await deleteDoc(doc(db, "address", userLogado.uid));
         await deleteDoc(doc(db, "users", userLogado.uid));
+        signOutFromApp();
+        navigate(basePath+"login");
     }
 
     function checkCep(e) {
@@ -95,11 +101,12 @@ export const Profile = () => {
         function checkUserHasPassword() {
             const providerData = userLogado.providerData;
             if (providerData.length === 1 && providerData[0].providerId === 'google.com') {
-                navigate("/completeAccount");
+                navigate(basePath + "completeAccount");
             }
         }
 
         async function retrieveUserData() {
+
             const userDoc = doc(db, 'users', userLogado.uid);
             const userData = (await getDoc(userDoc)).data();
             setValue("name", userLogado.displayName);
@@ -128,27 +135,33 @@ export const Profile = () => {
             retrieveUserData();
             retrieveUserAddress();
         } else {
-            navigate('/');
+            navigate(basePath);
         }
-    }, [navigate, userLogado, signed, setValue])
+    }, [navigate, userLogado, signed, setValue, basePath])
 
 
     return (
         <div className="root">
             <header className='navbar navbar-light sticky-top flex-md-nowrap p-0 shadow'>
-                <Link to="/" className='navbar-brand col-md-3 col-lg-2 me-0 px-3 '>MyCars</Link>
+                <Link to={basePath} className='navbar-brand col-md-3 col-lg-2 me-0 px-3 '>MyCars</Link>
                 <div className="navbar-nav">
                     <div className="nav-item text-nowrap">
-                        <Link to="/" className="nav-link px-3">{userLogado.displayName}</Link>
+                        <Link to={basePath} className="nav-link px-3">{userLogado.displayName}</Link>
                     </div>
                 </div>
             </header>
             <div className="container-fluid">
-                <Sidebar />
+                <Sidebar current={"profile"}/>
 
                 <main className="col-md-9 ms-sm-auto col-lg-10 px-md-4 ">
                     <h2 className='h2 pt-4'>Minha conta</h2>
                     <hr />
+
+                    <div className="alert alert-success col-sm-3 d-flex justify-content-between hidden">
+                        <strong>Informações salvas com sucesso!</strong>
+                        <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+
                     <form onSubmit={handleSubmit(onSubmit)}>
                         <div className="row">
                             <div className="col-md-5" style={{ borderRight: '1px solid #ebebeb' }}>
@@ -160,7 +173,6 @@ export const Profile = () => {
                                     <div className="form-floating">
                                         <input type="text" id="name" name='name' className="form-control"  {...register('name')} />
                                         <label htmlFor="name">Nome</label>
-
                                         <p className='error-message'>{errors.name?.message}</p>
                                     </div>
 
@@ -271,6 +283,7 @@ export const Profile = () => {
                                 </div>
                             </div>
                         </div>
+
                         <div className="container row d-flex justify-content-between pt-5">
                             <button type="submit" className='btn btn-success col-md-4' style={{ marginTop: '15px' }}>
                                 <FontAwesomeIcon icon={faSave} /> Salvar alterações</button>

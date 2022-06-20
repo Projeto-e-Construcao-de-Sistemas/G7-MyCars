@@ -21,6 +21,10 @@ export const AuthenticationContext = createContext({});
 export const AuthenticationProvider = ({ children }) => {
     const [user, setUser] = useState(null);
 
+    const baseUrl = process.env.PUBLIC_URL + "/";
+    const enviromnent = process.env.NODE_ENV;
+    const basePath = (enviromnent === "production") ? baseUrl : "/";
+
     useEffect(() => {
         const loadStoreAuth = () => {
             const sessionToken = sessionStorage.getItem("@AuthFirebase:token");
@@ -52,26 +56,28 @@ export const AuthenticationProvider = ({ children }) => {
             });
     }
 
-    const createUserEmailPassword = (email, password, name, phone, birthday, cpf) => {
-        createUserWithEmailAndPassword(auth, email, password)
-            .then((credential) => {
-                const token = credential.token;
-                const user = credential.user;
+    const createUserEmailPassword = async (email, password, name, phone, birthday, cpf) => {
+        try {
+            const credential = await createUserWithEmailAndPassword(auth, email, password);
+            const token = credential.token;
+            const user = credential.user;
 
-                updateProfile(auth.currentUser, { displayName: name }).then(() => {
-                    setUser(user);
+            updateProfile(auth.currentUser, { displayName: name }).then(() => {
+                setUser(user);
 
-                    createUserData(phone, birthday, cpf, credential.user.uid).then(() => {
-                        sessionStorage.setItem("@AuthFirebase:token", token);
-                        sessionStorage.setItem("@AuthFirebase:user", JSON.stringify(user));
+                createUserData(phone, birthday, cpf, credential.user.uid).then(() => {
+                    sessionStorage.setItem("@AuthFirebase:token", token);
+                    sessionStorage.setItem("@AuthFirebase:user", JSON.stringify(user));
 
-                        return <Navigate to="/login" />
-                    });
-                }).catch((err) => console.log(err));
-
-            }).catch((error) => {
-                console.log(error);
-            });
+                    return <Navigate to={basePath + "login"} />;
+                });
+            }).catch((err) => console.log(err));
+            
+            return true;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
     }
 
     const createUserData = async (phone, birthday, cpf, uid) => {
@@ -82,19 +88,20 @@ export const AuthenticationProvider = ({ children }) => {
         });
     }
 
-    const signInEmailPassword = (email, password, name) => {
-        signInWithEmailAndPassword(auth, email, password)
-            .then((credential) => {
-                const token = credential.token;
-                const user = credential.user;
+    const signInEmailPassword = async (email, password, name) => {
+        try {
+            const credential = await signInWithEmailAndPassword(auth, email, password);
+            const token = credential.token;
+            const user = credential.user;
 
-                setUser(user);
+            setUser(user);
 
-                sessionStorage.setItem("@AuthFirebase:token", token);
-                sessionStorage.setItem("@AuthFirebase:user", JSON.stringify(user));
-            }).catch((error) => {
-                console.log(error);
-            });
+            sessionStorage.setItem("@AuthFirebase:token", token);
+            sessionStorage.setItem("@AuthFirebase:user", JSON.stringify(user));
+            return true;
+        } catch (error) {
+            return false;
+        }
     }
 
     const linkCredentials = async (password, name, phone, birthday, cpf) => {
@@ -108,7 +115,7 @@ export const AuthenticationProvider = ({ children }) => {
 
             setUser(usercred.user);
             sessionStorage.setItem("@AuthFirebase:user", JSON.stringify(usercred.user));
-            return <Navigate to="/" />;
+            return <Navigate to={basePath} />;
         } catch (err) {
             console.log(err);
         }
@@ -118,11 +125,11 @@ export const AuthenticationProvider = ({ children }) => {
         signOut(auth).then(() => {
             sessionStorage.clear();
             setUser(null);
-
-            return <Navigate to="/login" />
+            console.log(basePath + "login");
+            return <Navigate to={basePath + "login"} />
         }).catch((error) => {
             console.log(error);
-            return <Navigate to="/" />
+            return <Navigate to={basePath} />
         });
     }
 
