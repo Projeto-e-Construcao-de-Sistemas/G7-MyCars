@@ -125,8 +125,8 @@ export const AuthenticationProvider = ({ children }) => {
         signOut(auth).then(() => {
             sessionStorage.clear();
             setUser(null);
-
-            return <Navigate to={basePath + "/login"} />
+            console.log(basePath + "login");
+            return <Navigate to={basePath + "login"} />
         }).catch((error) => {
             console.log(error);
             return <Navigate to={basePath} />

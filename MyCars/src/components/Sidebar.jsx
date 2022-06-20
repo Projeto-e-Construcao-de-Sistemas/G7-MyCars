@@ -7,7 +7,7 @@ import { AuthenticationContext } from '../context/authenticationContext';
 import { useState } from 'react';
 import { ThemeContext } from '../App';
 
-export const Sidebar = () => {
+export const Sidebar = ({current}) => {
 
     const { signOutFromApp } = useContext(AuthenticationContext);
     const { toggleTheme } = useContext(ThemeContext);
@@ -19,6 +19,7 @@ export const Sidebar = () => {
     const baseUrl = process.env.PUBLIC_URL+"/";
     const enviromnent = process.env.NODE_ENV;
     const basePath = (enviromnent === "production") ? baseUrl : "/";
+
 
     async function signOut() {
         await signOutFromApp();
@@ -35,19 +36,19 @@ export const Sidebar = () => {
             <div className="position-sticky pt-3">
                 <ul className="nav flex-column">
                     <li className="nav-item">
-                        <Link to={basePath+"/"} className='nav-link'>
+                        <Link to={basePath} className='nav-link'>
                             <FontAwesomeIcon icon={faMagnifyingGlass} /> Buscar veículos</Link>
                     </li>
                     <li className="nav-item">
-                        <Link to="#" className='nav-link active'>
+                        <Link to={basePath+"profile"} className={`nav-link ${current === 'profile' ? 'active' : ''}`}>
                             <FontAwesomeIcon icon={faUser} /> Meu perfil</Link>
                     </li>
                     <li className="nav-item">
-                        <Link to="#" className='nav-link'>
+                        <Link to={basePath+"myAnnouncements"} className={`nav-link ${current === 'myAnnouncements' ? 'active' : ''}`}>
                             <FontAwesomeIcon icon={faCar} /> Meus anúncios</Link>
                     </li>
                     <li className="nav-item">
-                        <Link to="#" className='nav-link'>
+                        <Link to={basePath+"createAnnouncement"} className={`nav-link ${current === 'createAnnouncement' ? 'active' : ''}`}>
                             <FontAwesomeIcon icon={faDollarSign} /> Criar um anúncio</Link>
                     </li>
                     <li className="nav-item">
@@ -55,9 +56,9 @@ export const Sidebar = () => {
                             <FontAwesomeIcon icon={faCommentDollar} /> Minhas negociações</Link>
                     </li>
                     <li className='nav-item' >
-                        <div class="form-check form-switch nav-link">
-                            <input style={{float:'inherit', marginRight:'10px'}} className="form-check-input" type="checkbox" id="flexSwitchCheckDefault" checked={darkMode} onClick={changeTheme} />
-                            <label className="form-check-label" for="flexSwitchCheckDefault"> Modo escuro</label>
+                        <div className="form-check form-switch nav-link">
+                            <input style={{float:'inherit', marginRight:'10px'}} className="form-check-input" type="checkbox" id="flexSwitchCheckDefault" checked={darkMode} onChange={changeTheme} />
+                            <label className="form-check-label" htmlFor="flexSwitchCheckDefault"> Modo escuro</label>
                         </div>
 
                     </li>
