@@ -80,6 +80,7 @@ export const Profile = () => {
         await deleteDoc(doc(db, "address", userLogado.uid));
         await deleteDoc(doc(db, "users", userLogado.uid));
         signOutFromApp();
+        navigate(basePath+"login");
     }
 
     function checkCep(e) {
@@ -150,7 +151,7 @@ export const Profile = () => {
                 </div>
             </header>
             <div className="container-fluid">
-                <Sidebar />
+                <Sidebar current={"profile"}/>
 
                 <main className="col-md-9 ms-sm-auto col-lg-10 px-md-4 ">
                     <h2 className='h2 pt-4'>Minha conta</h2>
@@ -172,7 +173,6 @@ export const Profile = () => {
                                     <div className="form-floating">
                                         <input type="text" id="name" name='name' className="form-control"  {...register('name')} />
                                         <label htmlFor="name">Nome</label>
-
                                         <p className='error-message'>{errors.name?.message}</p>
                                     </div>
 
