@@ -5,13 +5,13 @@ import { Sidebar } from '../../components/Sidebar';
 import { Link } from 'react-router-dom';
 
 import './CreateAnnouncement.css';
-import { doc, getDoc } from 'firebase/firestore';
+import { addDoc, collection, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { getStorage, ref, uploadBytes } from 'firebase/storage';
 import { db } from '../../services/firebaseConfig';
 
 import { carTypes } from "./carTypes";
 
-import { useForm, Controller } from 'react-hook-form';
-import InputMask from "react-input-mask";
+import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
 import { ImageInput } from '../../components/ImageInput/ImageInput';
@@ -33,6 +33,7 @@ export const CreateAnnouncement = () => {
     const [carTypesFiltered, setCarTypesFiltered] = useState([]);
     const [imageCount, setImageCount] = useState(0);
 
+    //TODO validate format of image
     const schema = yup.object({
         anoModelo: yup.string().matches('[0-9]+', "O valor digitado precisa ser numérico").required("Por favor preencha o ano do modelo"),
         anoFabricacao: yup.string().matches('[0-9]+', "O valor digitado precisa ser numérico").required("Por favor preencha o ano de fabricação"),
@@ -44,13 +45,13 @@ export const CreateAnnouncement = () => {
         placa: yup.string().required("Informe a placa do veículo"),
         limiteTestDrive: yup.string().required("Informe um valor limite para o test-drive"),
         descricao: yup.string().required("Informe uma descrição do anúncio"),
-        fotosVeiculo: yup.array().test("fotos-veiculo", "Por favor, insira ao menos uma imagem ao anúncio.",(value)=>{
+        fotosVeiculo: yup.array().test("fotos-veiculo", "Por favor, insira ao menos uma imagem ao anúncio.", (value) => {
             return value[0][0] !== undefined;
         })
     });
 
 
-    const { register, handleSubmit, setValue, setFocus, control, formState: { errors } } = useForm({
+    const { register, handleSubmit, formState: { errors } } = useForm({
         resolver: yupResolver(schema)
     });
 
@@ -62,11 +63,51 @@ export const CreateAnnouncement = () => {
     function onModeloChange(e) {
         document.querySelector("#otherInfos").classList.remove("hidden");
     }
-    
-    function onSubmit(announcement) {
-        const {anoFabricacao, anoModelo, cor, descricao, fotosVeiculo, limiteTestDrive, placa, quilometragem, tipoCambio, tipoVeiculo, valor} = announcement;
-    
 
+    async function onSubmit(announcement) {
+        const { marca, modelo, anoFabricacao, anoModelo, cor, descricao, fotosVeiculo, limiteTestDrive, placa, quilometragem, tipoCambio, tipoVeiculo, valor } = announcement;
+
+        const announcementDocRef = await addDoc(collection(db, "announcement"), {
+            anoFabricacao,
+            anoModelo,
+            cor,
+            descricao,
+            limiteTestDrive,
+            placa,
+            quilometragem,
+            tipoCambio,
+            tipoVeiculo,
+            valor,
+            images: [],
+            marca,
+            modelo,
+            ativo: true,
+            anuncioFinalizado:false,
+            dono: `/users/${userLogado.uid}`
+        });
+
+        const images = [];
+        for (let i = 0; i < fotosVeiculo.length; i++) {
+            const fotoVeiculo = fotosVeiculo[i];
+            const imgPath = await uploadImage(fotoVeiculo[0], announcementDocRef.id);
+            images.push(imgPath);
+        }
+
+        await updateDoc(announcementDocRef, {
+            images
+        });
+
+        navigate(basePath+"myAnnouncements")
+    }
+
+    async function uploadImage(image, announcementId) {
+        const imageName = `${new Date().getTime()}.${image.name.split('.')[1]}`;
+
+        const storage = getStorage();
+        const storageRef = ref(storage, `images/${announcementId}/${imageName}`);
+
+        const snapshot = await uploadBytes(storageRef, image);
+        return `https://firebasestorage.googleapis.com/v0/b/carnow-15c72.appspot.com/o/${snapshot.metadata.fullPath.replaceAll("/", "%2F")}?alt=media`;
     }
 
 
@@ -106,7 +147,7 @@ export const CreateAnnouncement = () => {
                     </div>
                 </div>
             </header>
-            <div className="container-fluid" style={{paddingBottom: "10rem"}}>
+            <div className="container-fluid" style={{ paddingBottom: "10rem" }}>
                 <Sidebar current={"createAnnouncement"} />
 
                 <main className="col-md-9 ms-sm-auto col-lg-10 px-md-4" >
@@ -131,7 +172,7 @@ export const CreateAnnouncement = () => {
 
                             <div className="row">
                                 <label htmlFor="marca" className='form-label'>Marca:</label>
-                                <select name="marca" className='form-select' disabled={notAddress} onChange={onChangeMarca}>
+                                <select name="marca" className='form-select' disabled={notAddress} {...register('marca')} onChange={onChangeMarca}>
                                     <option value="">Escolha uma marca</option>
                                     {carTypes.map((carType) => {
                                         return <option value={carType.marca}>{carType.marca}</option>
@@ -143,7 +184,7 @@ export const CreateAnnouncement = () => {
                             {carTypesFiltered.length !== 0 ? (
                                 <div className="row">
                                     <label htmlFor="modelo" className='form-label'>Modelo:</label>
-                                    <select name="modelo" className='form-select' onChange={onModeloChange}>
+                                    <select name="modelo" className='form-select'  {...register('modelo')} onChange={onModeloChange}>
                                         <option value="">Escolha um modelo</option>
                                         {carTypesFiltered[0].modelos.map((carTypeFiltered) => {
                                             return <option value={carTypeFiltered}>{carTypeFiltered}</option>
@@ -184,7 +225,7 @@ export const CreateAnnouncement = () => {
                                         <input aria-describedby="basic-addon2" type="number" id="quilometragem" name="quilometragem" className="form-control" placeholder='Quilometragem' {...register("quilometragem")} />
                                         <span className="input-group-text" id="basic-addon2">Km</span>
                                     </div>
-                                        <p className='error-message'>{errors.quilometragem?.message}</p>
+                                    <p className='error-message'>{errors.quilometragem?.message}</p>
                                 </div>
                             </div>
 
@@ -245,15 +286,15 @@ export const CreateAnnouncement = () => {
                                 <p className="error-message">{errors.fotosVeiculo?.message}</p>
                                 <div className="container">
                                     <div className="row">
-                                        {(()=>{
+                                        {(() => {
                                             const images = [];
-                                            for(let i = 0; i<= imageCount; i++){
-                                                images.push(<ImageInput key={i} isFirst={(i===0)} setImageCount={setImageCount} imageCount={imageCount} index={i} register={register}/>);
+                                            for (let i = 0; i <= imageCount; i++) {
+                                                images.push(<ImageInput key={i} isFirst={(i === 0)} setImageCount={setImageCount} imageCount={imageCount} index={i} register={register} />);
                                             }
 
                                             return images;
                                         })()}
-                                        <FontAwesomeIcon icon={faPlus} className="imgAdd" onClick={()=>setImageCount(imageCount+1)}/>
+                                        <FontAwesomeIcon icon={faPlus} className="imgAdd" onClick={() => setImageCount(imageCount + 1)} />
                                     </div>
                                 </div>
                                 <button type="submit" className='btn btn-success col-sm-12'>Criar anúncio</button>
