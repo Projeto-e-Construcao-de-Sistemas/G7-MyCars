@@ -1,14 +1,31 @@
-import { faLocationDot } from '@fortawesome/free-solid-svg-icons'
+import { faEdit, faLocationDot, faTrashAlt } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { deleteDoc, doc } from 'firebase/firestore'
+import { deleteObject, getStorage, listAll, ref } from 'firebase/storage'
 import React from 'react'
+import { db } from '../services/firebaseConfig'
 
-export function AnnouceCard({ title, description, estado, price, yearFabrication, yearVehicle, quilometragem, imageUrl }) {
+export function AnnouceCard({ title, description, estado, price, yearFabrication, yearVehicle, quilometragem, imageUrl, editable = false, id }) {
+    
+    const storage = getStorage();
+
+    async function deleteAnnounce(){
+        const imagesRef = ref(storage, `images/${id}/`);
+        const imgList = await listAll(imagesRef);
+        
+        for(let i = 0; i<imgList.items.length; i++){
+            await deleteObject(imgList.items[i]);
+        }
+
+        const announceDoc = doc(db, "announcement", id);
+        await deleteDoc(announceDoc);
+    }
+    
     return (
         <div className='col'>
             <div className="card h-100">
-                <img src={imageUrl} alt="" className='card-img-top'/>
-                {/* <svg className="bd-placeholder-img card-img-top" width="100%" height="180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Image cap" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#868e96"></rect><text x="50%" y="50%" fill="#dee2e6" dy=".3em">Image cap</text></svg> */}
-                <div className="card-body">
+                <img src={imageUrl} alt="" className='card-img-top' />
+                 <div className="card-body">
                     <h5 className="card-title">{title}</h5>
                     <p className="card-text">{description}</p>
                     <h5>R$ {price}</h5>
@@ -19,7 +36,20 @@ export function AnnouceCard({ title, description, estado, price, yearFabrication
                     </div>
                 </div>
                 <div className="card-footer">
-                    <small className="text-mutted"> <FontAwesomeIcon icon={faLocationDot} /> {estado}</small>
+                    {!editable ? (
+                        <small className="text-mutted"> <FontAwesomeIcon icon={faLocationDot} /> {estado}</small>
+                    ) : (
+                        <div className="btn-group col-sm-12" role="group" aria-label="Basic mixed styles example">
+                            <button type="button" className="btn btn-warning">
+                                <FontAwesomeIcon icon={faEdit} style={{marginRight: "10%"}}/>
+                                Editar
+                                </button>
+                            <button type="button" className="btn btn-danger" onClick={deleteAnnounce}>
+                                <FontAwesomeIcon icon={faTrashAlt} style={{marginRight: "10%"}}/>
+                                Remover
+                                </button>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

@@ -1,10 +1,13 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { AuthenticationContext } from '../../context/authenticationContext';
 import { useNavigate } from 'react-router';
 import { Sidebar } from '../../components/Sidebar';
 import { Link } from 'react-router-dom';
 
 import './MyAnnouncements.css';
+import { collection, onSnapshot, query, where } from 'firebase/firestore';
+import { db } from '../../services/firebaseConfig';
+import { AnnouceCard } from '../../components/AnnouceCard';
 
 export const MyAnnouncements = () => {
 
@@ -17,6 +20,8 @@ export const MyAnnouncements = () => {
 
     const navigate = useNavigate();
 
+    const [announcements, setAnnouncements] = useState([]);
+
     useEffect(() => {
         function checkUserHasPassword() {
             const providerData = userLogado.providerData;
@@ -24,14 +29,21 @@ export const MyAnnouncements = () => {
                 navigate(basePath + "completeAccount");
             }
         }
-     
+
+        function getAnnouncements() {
+            const q = query(collection(db, "announcement"), where("dono", "==", `/users/${userLogado.uid}`));
+            onSnapshot(q, (snapshot) => {
+                setAnnouncements(snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+            });
+        }
+
         if (signed) {
             checkUserHasPassword();
+            getAnnouncements();
         } else {
             navigate(basePath);
         }
     }, [navigate, userLogado, signed, basePath])
-
 
     return (
         <div className="root">
@@ -44,12 +56,35 @@ export const MyAnnouncements = () => {
                 </div>
             </header>
             <div className="container-fluid">
-                <Sidebar current={"myAnnouncements"}/>
+                <Sidebar current={"myAnnouncements"} />
 
                 <main className="col-md-9 ms-sm-auto col-lg-10 px-md-4 ">
                     <h2 className='h2 pt-4'>Meus Anúncios</h2>
                     <hr />
+                    {announcements.length === 0 ? (
+                        <h4>Parece que você não possui nenhum anúncio... Tente <Link to={basePath + "createAnnouncement"}>criar um anúncio!</Link></h4>
+                    ) : (
+                        <div className="row row-cols-1 row-cols-md-5 g-4 pt-5">
 
+                            {announcements.map((announcement) => {
+                                return (
+                                    <AnnouceCard
+                                        key={announcement.id}
+                                        id={announcement.id}
+                                        title={announcement.modelo}
+                                        description={announcement.descricao}
+                                        price={announcement.valor}
+                                        yearFabrication={announcement.anoFabricacao}
+                                        yearVehicle={announcement.anoModelo}
+                                        quilometragem={announcement.quilometragem}
+                                        imageUrl={announcement.images[0]}
+                                        estado="Rio de Janeiro - RJ"
+                                        editable={true} />
+                                )
+                            })}
+
+                        </div>
+                    )}
                 </main>
             </div>
         </div>
