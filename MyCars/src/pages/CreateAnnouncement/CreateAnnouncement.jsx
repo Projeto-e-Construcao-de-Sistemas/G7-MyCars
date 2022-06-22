@@ -5,13 +5,13 @@ import { Sidebar } from '../../components/Sidebar';
 import { Link } from 'react-router-dom';
 
 import './CreateAnnouncement.css';
-import { doc, getDoc } from 'firebase/firestore';
+import { addDoc, collection, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { getStorage, ref, uploadBytes } from 'firebase/storage';
 import { db } from '../../services/firebaseConfig';
 
 import { carTypes } from "./carTypes";
 
-import { useForm, Controller } from 'react-hook-form';
-import InputMask from "react-input-mask";
+import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
 import { ImageInput } from '../../components/ImageInput/ImageInput';
@@ -33,12 +33,25 @@ export const CreateAnnouncement = () => {
     const [carTypesFiltered, setCarTypesFiltered] = useState([]);
     const [imageCount, setImageCount] = useState(0);
 
+    //TODO validate format of image
     const schema = yup.object({
-        // anoModelo: yup.number().required("Por favor preencha o ano do modelo"),
-        // anoFabricacao: yup.number().required("Por favor preencha o ano de fabricação")
+        anoModelo: yup.string().matches('[0-9]+', "O valor digitado precisa ser numérico").required("Por favor preencha o ano do modelo"),
+        anoFabricacao: yup.string().matches('[0-9]+', "O valor digitado precisa ser numérico").required("Por favor preencha o ano de fabricação"),
+        valor: yup.string().required("Por favor preencha esse campo."),
+        quilometragem: yup.string().required("Por favor preencha esse campo"),
+        tipoCambio: yup.string().required("Por favor, selecione o tipo de câmbio do veículo"),
+        tipoVeiculo: yup.string().required("Por favor, informe o tipo do seu anúncio"),
+        cor: yup.string().required("Informe a cor do veículo"),
+        placa: yup.string().required("Informe a placa do veículo"),
+        limiteTestDrive: yup.string().required("Informe um valor limite para o test-drive"),
+        descricao: yup.string().required("Informe uma descrição do anúncio"),
+        fotosVeiculo: yup.array().test("fotos-veiculo", "Por favor, insira ao menos uma imagem ao anúncio.", (value) => {
+            return value[0][0] !== undefined;
+        })
     });
 
-    const { register, handleSubmit, setValue, setFocus, control, formState: { errors } } = useForm({
+
+    const { register, handleSubmit, formState: { errors } } = useForm({
         resolver: yupResolver(schema)
     });
 
@@ -50,10 +63,53 @@ export const CreateAnnouncement = () => {
     function onModeloChange(e) {
         document.querySelector("#otherInfos").classList.remove("hidden");
     }
-    
-    function onSubmit(announcement) {
-        console.log(announcement);
+
+    async function onSubmit(announcement) {
+        const { marca, modelo, anoFabricacao, anoModelo, cor, descricao, fotosVeiculo, limiteTestDrive, placa, quilometragem, tipoCambio, tipoVeiculo, valor } = announcement;
+
+        const announcementDocRef = await addDoc(collection(db, "announcement"), {
+            anoFabricacao,
+            anoModelo,
+            cor,
+            descricao,
+            limiteTestDrive,
+            placa,
+            quilometragem,
+            tipoCambio,
+            tipoVeiculo,
+            valor,
+            images: [],
+            marca,
+            modelo,
+            ativo: true,
+            anuncioFinalizado:false,
+            dono: `/users/${userLogado.uid}`
+        });
+
+        const images = [];
+        for (let i = 0; i < fotosVeiculo.length; i++) {
+            const fotoVeiculo = fotosVeiculo[i];
+            const imgPath = await uploadImage(fotoVeiculo[0], announcementDocRef.id);
+            images.push(imgPath);
+        }
+
+        await updateDoc(announcementDocRef, {
+            images
+        });
+
+        navigate(basePath+"myAnnouncements")
     }
+
+    async function uploadImage(image, announcementId) {
+        const imageName = `${new Date().getTime()}.${image.name.split('.')[1]}`;
+
+        const storage = getStorage();
+        const storageRef = ref(storage, `images/${announcementId}/${imageName}`);
+
+        const snapshot = await uploadBytes(storageRef, image);
+        return `https://firebasestorage.googleapis.com/v0/b/carnow-15c72.appspot.com/o/${snapshot.metadata.fullPath.replaceAll("/", "%2F")}?alt=media`;
+    }
+
 
     useEffect(() => {
         function checkUserHasPassword() {
@@ -82,7 +138,7 @@ export const CreateAnnouncement = () => {
 
 
     return (
-        <div className="root">
+        <div className="root" id="createAnnouncement">
             <header className='navbar navbar-light sticky-top flex-md-nowrap p-0 shadow'>
                 <Link to={basePath} className='navbar-brand col-md-3 col-lg-2 me-0 px-3 '>MyCars</Link>
                 <div className="navbar-nav">
@@ -91,7 +147,7 @@ export const CreateAnnouncement = () => {
                     </div>
                 </div>
             </header>
-            <div className="container-fluid" style={{paddingBottom: "10rem"}}>
+            <div className="container-fluid" style={{ paddingBottom: "10rem" }}>
                 <Sidebar current={"createAnnouncement"} />
 
                 <main className="col-md-9 ms-sm-auto col-lg-10 px-md-4" >
@@ -116,7 +172,7 @@ export const CreateAnnouncement = () => {
 
                             <div className="row">
                                 <label htmlFor="marca" className='form-label'>Marca:</label>
-                                <select name="marca" className='form-select' disabled={notAddress} onChange={onChangeMarca}>
+                                <select name="marca" className='form-select' disabled={notAddress} {...register('marca')} onChange={onChangeMarca}>
                                     <option value="">Escolha uma marca</option>
                                     {carTypes.map((carType) => {
                                         return <option value={carType.marca}>{carType.marca}</option>
@@ -125,10 +181,10 @@ export const CreateAnnouncement = () => {
                                 {/* <p className='error-message'>{errors.name?.message}</p> */}
                             </div>
 
-                            {carTypesFiltered.length != 0 ? (
+                            {carTypesFiltered.length !== 0 ? (
                                 <div className="row">
                                     <label htmlFor="modelo" className='form-label'>Modelo:</label>
-                                    <select name="modelo" className='form-select' onChange={onModeloChange}>
+                                    <select name="modelo" className='form-select'  {...register('modelo')} onChange={onModeloChange}>
                                         <option value="">Escolha um modelo</option>
                                         {carTypesFiltered[0].modelos.map((carTypeFiltered) => {
                                             return <option value={carTypeFiltered}>{carTypeFiltered}</option>
@@ -144,12 +200,12 @@ export const CreateAnnouncement = () => {
                                 <div className="form-floating col-sm-6">
                                     <input type="text" pattern='[0-9]+' maxLength="4" id="anoModelo" name="anoModelo" className="form-control" placeholder='Ano do modelo' {...register("anoModelo")} />
                                     <label htmlFor="anoModelo">Ano do modelo</label>
-                                    <p className='error-message'>{errors.name?.message}</p>
+                                    <p className='error-message'>{errors.anoModelo?.message}</p>
                                 </div>
                                 <div className="form-floating col-sm-6">
                                     <input type="text" maxLength={4} pattern='[0-9]+' id="anoFabricacao" name="anoFabricacao" className="form-control" placeholder='Ano de fabricação' {...register("anoFabricacao")} />
                                     <label htmlFor="anoFabricacao">Ano de fabricação</label>
-                                    <p className='error-message'>{errors.name?.message}</p>
+                                    <p className='error-message'>{errors.anoFabricacao?.message}</p>
                                 </div>
                             </div>
 
@@ -158,18 +214,18 @@ export const CreateAnnouncement = () => {
                                     <label htmlFor="valor">Valor:</label>
                                     <div className="input-group">
                                         <span className="input-group-text" id="basic-addon1">R$</span>
-                                        <input aria-describedby="basic-addon1" type="double" id="valor" name="valor" className="form-control col-sm-6" placeholder='Valor' {...register("valor")} />
+                                        <input aria-describedby="basic-addon1" type="number" id="valor" name="valor" className="form-control col-sm-6" placeholder='Valor' {...register("valor")} />
                                     </div>
-                                    <p className='error-message'>{errors.name?.message}</p>
+                                    <p className='error-message'>{errors.valor?.message}</p>
                                 </div>
 
                                 <div className="col-sm-6">
                                     <label htmlFor="quilometragem">Quilometragem:</label>
                                     <div className="input-group col-sm-6">
-                                        <input aria-describedby="basic-addon2" type="double" id="quilometragem" name="quilometragem" className="form-control" placeholder='Quilometragem' {...register("quilometragem")} />
+                                        <input aria-describedby="basic-addon2" type="number" id="quilometragem" name="quilometragem" className="form-control" placeholder='Quilometragem' {...register("quilometragem")} />
                                         <span className="input-group-text" id="basic-addon2">Km</span>
-                                        <p className='error-message'>{errors.name?.message}</p>
                                     </div>
+                                    <p className='error-message'>{errors.quilometragem?.message}</p>
                                 </div>
                             </div>
 
@@ -182,6 +238,8 @@ export const CreateAnnouncement = () => {
                                         <option value="automatico">Automático</option>
                                         <option value="automatizado">Automatizado</option>
                                     </select>
+                                    <p className='error-message'>{errors.tipoCambio?.message}</p>
+
                                 </div>
                                 <div className="col-sm-6">
                                     <label htmlFor="tipoVeiculo">Tipo do veículo</label>
@@ -191,6 +249,8 @@ export const CreateAnnouncement = () => {
                                         <option value="seminovo">Seminovo</option>
                                         <option value="usado">Usado</option>
                                     </select>
+                                    <p className='error-message'>{errors.tipoVeiculo?.message}</p>
+
                                 </div>
                             </div>
 
@@ -198,19 +258,19 @@ export const CreateAnnouncement = () => {
                                 <div className="form-floating col-sm-4">
                                     <input type="text" id="cor" name="cor" className="form-control" placeholder='cor' {...register("cor")} />
                                     <label htmlFor="cor">Cor</label>
-                                    <p className='error-message'>{errors.name?.message}</p>
+                                    <p className='error-message'>{errors.cor?.message}</p>
                                 </div>
 
                                 <div className="form-floating col-sm-4">
                                     <input type="text" maxLength="7" id="placa" name="placa" className="form-control" placeholder='placa' {...register("placa")} />
                                     <label htmlFor="placa">Placa</label>
-                                    <p className='error-message'>{errors.name?.message}</p>
+                                    <p className='error-message'>{errors.placa?.message}</p>
                                 </div>
 
                                 <div className="form-floating col-sm-4">
                                     <input type="number" id="limiteTestDrive" name="limiteTestDrive" className="form-control" placeholder='limiteTestDrive' {...register("limiteTestDrive")} />
                                     <label htmlFor="limiteTestDrive">Limite de tests Drive</label>
-                                    <p className='error-message'>{errors.name?.message}</p>
+                                    <p className='error-message'>{errors.limiteTestDrive?.message}</p>
                                 </div>
                             </div>
 
@@ -218,22 +278,23 @@ export const CreateAnnouncement = () => {
                                 <label htmlFor="descricao">Descrição:</label>
                                 <textarea id="descricao" rows="5" name="descricao" className="form-control" placeholder='Escreva uma descrição do seu anúncio' {...register("descricao")} >
                                 </textarea>
-                                <p className='error-message'>{errors.name?.message}</p>
+                                <p className='error-message'>{errors.descricao?.message}</p>
                             </div>
 
                             <div className="row">
-                                <h4>Insira ao menos uma imagem do veículo</h4>
+                                <h4>Mostre ao mundo o seu veículo!</h4>
+                                <p className="error-message">{errors.fotosVeiculo?.message}</p>
                                 <div className="container">
                                     <div className="row">
-                                        {(()=>{
+                                        {(() => {
                                             const images = [];
-                                            for(let i = 0; i<= imageCount; i++){
-                                                images.push(<ImageInput key={i} isFirst={(i==0)} setImageCount={setImageCount} imageCount={imageCount} index={i} register={register}/>);
+                                            for (let i = 0; i <= imageCount; i++) {
+                                                images.push(<ImageInput key={i} isFirst={(i === 0)} setImageCount={setImageCount} imageCount={imageCount} index={i} register={register} />);
                                             }
 
                                             return images;
                                         })()}
-                                        <FontAwesomeIcon icon={faPlus} className="imgAdd" onClick={()=>setImageCount(imageCount+1)}/>
+                                        <FontAwesomeIcon icon={faPlus} className="imgAdd" onClick={() => setImageCount(imageCount + 1)} />
                                     </div>
                                 </div>
                                 <button type="submit" className='btn btn-success col-sm-12'>Criar anúncio</button>
