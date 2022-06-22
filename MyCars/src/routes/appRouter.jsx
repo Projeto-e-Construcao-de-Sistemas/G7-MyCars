@@ -16,22 +16,26 @@ export const AppRoutes = () => {
     return (
         <BrowserRouter>
             <Routes>
-                <Route index path={basePath} element={<Home />} />
-                <Route path={basePath + "login"} element={<Login />} />
-                <Route path={basePath + "createAccount"} element={<CreateAccount />} />
+                <Route index path={basePath} exact element={<Home />} />
+                <Route path={basePath + "login/"} exact element={<Login />} />
+                <Route path={basePath + "createAccount/"} exact element={<CreateAccount />} />
 
-                <Route path={basePath + "profile"} element={<PrivateRoutes />}>
-                    <Route path={basePath + "profile"} element={<Profile />} />
+                <Route path={basePath + "profile/"} exact element={<PrivateRoutes />}>
+                    <Route path={basePath + "profile/"} exact element={<Profile />} />
                 </Route>
 
-                <Route path={basePath + "myAnnouncements"} element={<PrivateRoutes />}>
-                    <Route path={basePath + "myAnnouncements"} element={<MyAnnouncements />} />
-                </Route>
-                <Route path={basePath + "createAnnouncement"} element={<PrivateRoutes />}>
-                    <Route path={basePath + "createAnnouncement"} element={<CreateAnnouncement />} />
+                <Route path={basePath + "myAnnouncements/"} exact element={<PrivateRoutes />}>
+                    <Route path={basePath + "myAnnouncements/"} exact element={<MyAnnouncements />} />
                 </Route>
 
-                <Route path={basePath + "completeAccount"} element={<CompleteAccount />} />
+                <Route path={basePath + "createAnnouncement/"} exact element={<PrivateRoutes />} >
+                    <Route path={basePath + "createAnnouncement/"} exact element={<CreateAnnouncement/>} />
+                </Route>
+                <Route path={basePath + "createAnnouncement/:id"} exact element={<PrivateRoutes />}>
+                    <Route path={basePath + "createAnnouncement/:id"} exact element={<CreateAnnouncement />} />
+                </Route>
+
+                <Route path={basePath + "completeAccount"} exact element={<CompleteAccount />} />
 
             </Routes>
         </BrowserRouter>

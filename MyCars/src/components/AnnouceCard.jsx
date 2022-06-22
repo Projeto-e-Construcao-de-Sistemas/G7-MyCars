@@ -3,11 +3,16 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { deleteDoc, doc } from 'firebase/firestore'
 import { deleteObject, getStorage, listAll, ref } from 'firebase/storage'
 import React from 'react'
+import { Link } from 'react-router-dom'
 import { db } from '../services/firebaseConfig'
 
 export function AnnouceCard({ title, description, estado, price, yearFabrication, yearVehicle, quilometragem, imageUrl, editable = false, id }) {
     
     const storage = getStorage();
+
+    const baseUrl = process.env.PUBLIC_URL + "/";
+    const enviromnent = process.env.NODE_ENV;
+    const basePath = (enviromnent === "production") ? baseUrl : "/";
 
     async function deleteAnnounce(){
         const imagesRef = ref(storage, `images/${id}/`);
@@ -40,10 +45,10 @@ export function AnnouceCard({ title, description, estado, price, yearFabrication
                         <small className="text-mutted"> <FontAwesomeIcon icon={faLocationDot} /> {estado}</small>
                     ) : (
                         <div className="btn-group col-sm-12" role="group" aria-label="Basic mixed styles example">
-                            <button type="button" className="btn btn-warning">
+                            <Link to={`${basePath}createAnnouncement/${id}`} className="btn btn-warning">
                                 <FontAwesomeIcon icon={faEdit} style={{marginRight: "10%"}}/>
                                 Editar
-                                </button>
+                                </Link>
                             <button type="button" className="btn btn-danger" onClick={deleteAnnounce}>
                                 <FontAwesomeIcon icon={faTrashAlt} style={{marginRight: "10%"}}/>
                                 Remover

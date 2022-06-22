@@ -3,9 +3,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useState } from 'react'
 import "./ImageInput.css";
 
-export const ImageInput = ({ isFirst, setImageCount, imageCount, register, index }) => {
+export const ImageInput = ({ isFirst, setImageCount, imageCount, register, index, backgroundImage = "" }) => {
 
-    const [image, setImage] = useState("");
+    const [image, setImage] = useState(backgroundImage);
 
     function showPreview(e) {
         const files = e.target.files;

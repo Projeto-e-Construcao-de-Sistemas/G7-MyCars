@@ -4,6 +4,8 @@ import { AuthenticationContext } from "../context/authenticationContext";
 
 export const PrivateRoutes = () => {
     const { signed } = useContext(AuthenticationContext);
+    const isUserOnSessionstorage = !!sessionStorage.getItem("@AuthFirebase:user");
 
-    return signed ? <Outlet /> : <Navigate to="/login" />;
+    const condition = (signed || isUserOnSessionstorage);
+    return (signed || isUserOnSessionstorage) ? <Outlet /> : <Navigate to="/login" />;
 }

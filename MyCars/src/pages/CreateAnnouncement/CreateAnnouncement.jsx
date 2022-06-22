@@ -1,11 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { AuthenticationContext } from '../../context/authenticationContext';
-import { useNavigate } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import { Sidebar } from '../../components/Sidebar';
 import { Link } from 'react-router-dom';
 
 import './CreateAnnouncement.css';
-import { addDoc, collection, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { addDoc, collection, doc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes } from 'firebase/storage';
 import { db } from '../../services/firebaseConfig';
 
@@ -33,6 +33,10 @@ export const CreateAnnouncement = () => {
     const [carTypesFiltered, setCarTypesFiltered] = useState([]);
     const [imageCount, setImageCount] = useState(0);
 
+    const [currentAnnouncement, setCurrentAnnouncement] = useState(null);
+
+    const { id } = useParams();
+
     //TODO validate format of image
     const schema = yup.object({
         anoModelo: yup.string().matches('[0-9]+', "O valor digitado precisa ser numérico").required("Por favor preencha o ano do modelo"),
@@ -51,7 +55,7 @@ export const CreateAnnouncement = () => {
     });
 
 
-    const { register, handleSubmit, formState: { errors } } = useForm({
+    const { register, handleSubmit,setValue, formState: { errors } } = useForm({
         resolver: yupResolver(schema)
     });
 
@@ -82,7 +86,7 @@ export const CreateAnnouncement = () => {
             marca,
             modelo,
             ativo: true,
-            anuncioFinalizado:false,
+            anuncioFinalizado: false,
             dono: `/users/${userLogado.uid}`
         });
 
@@ -97,7 +101,7 @@ export const CreateAnnouncement = () => {
             images
         });
 
-        navigate(basePath+"myAnnouncements")
+        navigate(basePath + "myAnnouncements")
     }
 
     async function uploadImage(image, announcementId) {
@@ -127,15 +131,57 @@ export const CreateAnnouncement = () => {
 
         }
 
+        async function getCurrentAnnouncement(){
+            if(!id || currentAnnouncement) return
+
+            const announcementDoc = doc(db, "announcement", id);
+            const announcement = (await getDoc(announcementDoc)).data();
+            
+            setCurrentAnnouncement(announcement);
+
+            setValue("modelo", announcement.modelo);
+            setValue("marca", announcement.marca);
+            setValue("valor", announcement.valor);
+            setValue("placa", announcement.placa);
+            setValue("descricao", announcement.descricao);
+            setValue("limiteTestDrive", announcement.limiteTestdrive);
+            setValue("anoFabricacao", announcement.anoFabricacao);
+            setValue("anoModelo", announcement.anoModelo);
+            setValue("cor", announcement.cor);
+            setValue("tipoCambio", announcement.tipoCambio);
+            setValue("tipoVeiculo", announcement.tipoVeiculo);
+            setValue("quilometragem", announcement.quilometragem);
+            
+            document.querySelector("#otherInfos").classList.remove("hidden");
+
+            setCarTypesFiltered(carTypes.filter(carType => carType.marca === announcement.marca));
+
+            const imgFiles = [];
+            for(let i = 0; i<announcement.images.length; i++){
+                const imgFile = [];
+                const response = await (fetch(announcement.images[i], {mode: 'no-cors'}));
+                const blob = await response.blob();
+                const file = new File([blob], 'announcement.images', {type: blob.type});
+                imgFile.push(file);
+                imgFiles.push(imgFile);
+            }
+
+            console.log(announcement);
+            imgFiles.forEach(()=>{
+                console.log(imgFiles);
+            })
+            // console.log(announcement);
+        }
+
         if (signed) {
             checkUserHasPassword();
             retrieveUserAddress();
-
+            getCurrentAnnouncement();
+            
         } else {
             navigate(basePath);
         }
-    }, [navigate, userLogado, signed, basePath])
-
+    }, [navigate, userLogado, signed, basePath, id, currentAnnouncement])
 
     return (
         <div className="root" id="createAnnouncement">
@@ -175,7 +221,7 @@ export const CreateAnnouncement = () => {
                                 <select name="marca" className='form-select' disabled={notAddress} {...register('marca')} onChange={onChangeMarca}>
                                     <option value="">Escolha uma marca</option>
                                     {carTypes.map((carType) => {
-                                        return <option value={carType.marca}>{carType.marca}</option>
+                                        return <option key={carType.marca} value={carType.marca}>{carType.marca}</option>
                                     })}
                                 </select>
                                 {/* <p className='error-message'>{errors.name?.message}</p> */}
@@ -187,7 +233,7 @@ export const CreateAnnouncement = () => {
                                     <select name="modelo" className='form-select'  {...register('modelo')} onChange={onModeloChange}>
                                         <option value="">Escolha um modelo</option>
                                         {carTypesFiltered[0].modelos.map((carTypeFiltered) => {
-                                            return <option value={carTypeFiltered}>{carTypeFiltered}</option>
+                                            return <option key={carTypeFiltered} value={carTypeFiltered}>{carTypeFiltered}</option>
                                         })}
                                     </select>
                                     {/* <p className='error-message'>{errors.name?.message}</p> */}
