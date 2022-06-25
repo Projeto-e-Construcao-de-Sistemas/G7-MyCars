@@ -5,8 +5,8 @@ import { Sidebar } from '../../components/Sidebar';
 import { Link } from 'react-router-dom';
 
 import './CreateAnnouncement.css';
-import { addDoc, collection, doc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
-import { getStorage, ref, uploadBytes } from 'firebase/storage';
+import { addDoc, collection, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { deleteObject, getDownloadURL, getStorage, listAll, ref, uploadBytes } from 'firebase/storage';
 import { db } from '../../services/firebaseConfig';
 
 import { carTypes } from "./carTypes";
@@ -33,6 +33,8 @@ export const CreateAnnouncement = () => {
     const [carTypesFiltered, setCarTypesFiltered] = useState([]);
     const [imageCount, setImageCount] = useState(0);
 
+    const [imagesThumbnail, setImagesThumbnail] = useState([])
+
     const [currentAnnouncement, setCurrentAnnouncement] = useState(null);
 
     const { id } = useParams();
@@ -55,7 +57,7 @@ export const CreateAnnouncement = () => {
     });
 
 
-    const { register, handleSubmit,setValue, formState: { errors } } = useForm({
+    const { register, handleSubmit, setValue, unregister, formState: { errors } } = useForm({
         resolver: yupResolver(schema)
     });
 
@@ -71,7 +73,7 @@ export const CreateAnnouncement = () => {
     async function onSubmit(announcement) {
         const { marca, modelo, anoFabricacao, anoModelo, cor, descricao, fotosVeiculo, limiteTestDrive, placa, quilometragem, tipoCambio, tipoVeiculo, valor } = announcement;
 
-        const announcementDocRef = await addDoc(collection(db, "announcement"), {
+        const announcementData = {
             anoFabricacao,
             anoModelo,
             cor,
@@ -88,10 +90,20 @@ export const CreateAnnouncement = () => {
             ativo: true,
             anuncioFinalizado: false,
             dono: `/users/${userLogado.uid}`
-        });
+        }
+
+        let announcementDocRef;
+        if (!id) {
+            announcementDocRef = await addDoc(collection(db, "announcement"), announcementData)
+        } else {
+            await setDoc(doc(db, "announcement", id), announcementData);
+            announcementDocRef = doc(db, "announcement", id);
+        }
+
+        await clearDocImages();
 
         const images = [];
-        for (let i = 0; i < fotosVeiculo.length; i++) {
+        for (let i = 0; i < imageCount+1; i++) {
             const fotoVeiculo = fotosVeiculo[i];
             const imgPath = await uploadImage(fotoVeiculo[0], announcementDocRef.id);
             images.push(imgPath);
@@ -101,7 +113,17 @@ export const CreateAnnouncement = () => {
             images
         });
 
-        navigate(basePath + "myAnnouncements")
+        navigate(basePath + "myAnnouncements");
+    }
+
+    async function clearDocImages() {
+        const storage = getStorage();
+        const imagesRef = ref(storage, `images/${id}/`);
+        const imgList = await listAll(imagesRef);
+
+        for (let i = 0; i < imgList.items.length; i++) {
+            await deleteObject(imgList.items[i]);
+        }
     }
 
     async function uploadImage(image, announcementId) {
@@ -131,12 +153,12 @@ export const CreateAnnouncement = () => {
 
         }
 
-        async function getCurrentAnnouncement(){
-            if(!id || currentAnnouncement) return
+        async function getCurrentAnnouncement() {
+            if (!id || currentAnnouncement) return
 
             const announcementDoc = doc(db, "announcement", id);
             const announcement = (await getDoc(announcementDoc)).data();
-            
+
             setCurrentAnnouncement(announcement);
 
             setValue("modelo", announcement.modelo);
@@ -144,44 +166,58 @@ export const CreateAnnouncement = () => {
             setValue("valor", announcement.valor);
             setValue("placa", announcement.placa);
             setValue("descricao", announcement.descricao);
-            setValue("limiteTestDrive", announcement.limiteTestdrive);
+            setValue("limiteTestDrive", announcement.limiteTestDrive);
             setValue("anoFabricacao", announcement.anoFabricacao);
             setValue("anoModelo", announcement.anoModelo);
             setValue("cor", announcement.cor);
             setValue("tipoCambio", announcement.tipoCambio);
             setValue("tipoVeiculo", announcement.tipoVeiculo);
             setValue("quilometragem", announcement.quilometragem);
-            
+
             document.querySelector("#otherInfos").classList.remove("hidden");
 
             setCarTypesFiltered(carTypes.filter(carType => carType.marca === announcement.marca));
 
+            setImageCount(announcement.images.length - 1);
+            setImagesThumbnail(announcement.images);
+            setValue("fotosVeiculo", await getImages(announcement.images));
+        }
+
+
+        async function getImages(imagesURL) {
+            const storage = getStorage();
+
             const imgFiles = [];
-            for(let i = 0; i<announcement.images.length; i++){
+
+
+            for (let i = 0; i < imagesURL.length; i++) {
                 const imgFile = [];
-                const response = await (fetch(announcement.images[i], {mode: 'no-cors'}));
+                const imgFullURL = imagesURL[i].split('?')[0];
+
+                const downloadURL = await getDownloadURL(ref(storage, imgFullURL));
+
+                const response = await (fetch(downloadURL));
                 const blob = await response.blob();
-                const file = new File([blob], 'announcement.images', {type: blob.type});
+
+                const tmpImgName = `${new Date().getTime()}.${imgFullURL.split('.')[5]}`
+
+                const file = new File([blob], tmpImgName, { type: blob.type });
                 imgFile.push(file);
                 imgFiles.push(imgFile);
             }
 
-            console.log(announcement);
-            imgFiles.forEach(()=>{
-                console.log(imgFiles);
-            })
-            // console.log(announcement);
+            return imgFiles;
         }
 
         if (signed) {
             checkUserHasPassword();
             retrieveUserAddress();
             getCurrentAnnouncement();
-            
+
         } else {
             navigate(basePath);
         }
-    }, [navigate, userLogado, signed, basePath, id, currentAnnouncement])
+    }, [navigate, userLogado, signed, basePath, id, currentAnnouncement, setValue])
 
     return (
         <div className="root" id="createAnnouncement">
@@ -335,7 +371,17 @@ export const CreateAnnouncement = () => {
                                         {(() => {
                                             const images = [];
                                             for (let i = 0; i <= imageCount; i++) {
-                                                images.push(<ImageInput key={i} isFirst={(i === 0)} setImageCount={setImageCount} imageCount={imageCount} index={i} register={register} />);
+                                                images.push(
+                                                    <ImageInput
+                                                        key={i}
+                                                        isFirst={(i === 0)}
+                                                        setImageCount={setImageCount}
+                                                        imageCount={imageCount}
+                                                        index={i}
+                                                        register={register}
+                                                        backgroundImage={(imagesThumbnail.length !== 0) ? imagesThumbnail[i] : ""}
+                                                        unregister={unregister}
+                                                    />);
                                             }
 
                                             return images;
@@ -343,7 +389,7 @@ export const CreateAnnouncement = () => {
                                         <FontAwesomeIcon icon={faPlus} className="imgAdd" onClick={() => setImageCount(imageCount + 1)} />
                                     </div>
                                 </div>
-                                <button type="submit" className='btn btn-success col-sm-12'>Criar anúncio</button>
+                                <button type="submit" className='btn btn-success col-sm-12'>{(!id) ? "Criar" : "Salvar"} anúncio</button>
                             </div>
                         </div>
                     </form>
