@@ -71,6 +71,10 @@ export const CreateAnnouncement = () => {
     }
 
     async function onSubmit(announcement) {
+        const loadingBtn = document.querySelector("#loading");
+        loadingBtn.classList.remove('hidden');
+        loadingBtn.parentElement.setAttribute("disabled", "disabled");
+
         const { marca, modelo, anoFabricacao, anoModelo, cor, descricao, fotosVeiculo, limiteTestDrive, placa, quilometragem, tipoCambio, tipoVeiculo, valor } = announcement;
 
         const announcementData = {
@@ -103,7 +107,7 @@ export const CreateAnnouncement = () => {
         await clearDocImages();
 
         const images = [];
-        for (let i = 0; i < imageCount+1; i++) {
+        for (let i = 0; i < imageCount + 1; i++) {
             const fotoVeiculo = fotosVeiculo[i];
             const imgPath = await uploadImage(fotoVeiculo[0], announcementDocRef.id);
             images.push(imgPath);
@@ -389,14 +393,17 @@ export const CreateAnnouncement = () => {
                                         <FontAwesomeIcon icon={faPlus} className="imgAdd" onClick={() => setImageCount(imageCount + 1)} />
                                     </div>
                                 </div>
-                                <button type="submit" className='btn btn-success col-sm-12'>{(!id) ? "Criar" : "Salvar"} anúncio</button>
+                                <button type="submit" className='btn btn-success col-sm-12'>
+                                    <span className="spinner-border spinner-border-sm hidden" id="loading" role="status" aria-hidden="true"> </span>
+                                    {(!id) ? " Criar" : " Salvar"} anúncio
+                                </button>
                             </div>
                         </div>
                     </form>
 
                 </main>
             </div>
-        </div>
+        </div >
     )
 }
 
