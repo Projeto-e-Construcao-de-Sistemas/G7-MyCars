@@ -15,23 +15,27 @@ export const Annoucements = () => {
 
 
   useEffect(() => {
-    if(!id || currentAnnouncement) return
-    const getAnnoucement =  async () =>{
+
+    const getAnnouncements = async () => {
+
+      if (!id || currentAnnouncement) return
+
       const announcementDoc = doc(db, "announcement", id);
       const response = (await getDoc(announcementDoc)).data();
-      setCurrentAnnouncement(response)     
+      setCurrentAnnouncement(response)
     }
-    getAnnoucement()
-    .catch(console.error)
-  }, []);
-  
+
+    getAnnouncements();
+
+  }, [setCurrentAnnouncement, id]);
+
   console.log(currentAnnouncement)
 
   return (
     <div className='root'>
       <Navbar current="home" />
-       <div className='card w-50 position-absolute top-50 start-50 translate-middle'>
-        <img src={currentAnnouncement.images[0]} alt="" className='' />
+      <div className='card w-50 position-absolute top-50 start-50 translate-middle'>
+        <img src={currentAnnouncement?.images[0]} alt="" className='' />
         {/* <p>{image}</p> */}
       </div>
     </div>
