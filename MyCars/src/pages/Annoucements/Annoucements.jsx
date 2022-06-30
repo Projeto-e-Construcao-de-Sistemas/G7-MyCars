@@ -17,8 +17,6 @@ export const Annoucements = () => {
   const enviromnent = process.env.NODE_ENV;
   const basePath = (enviromnent === "production") ? baseUrl : "/";
 
-
-
   useEffect(() => {
 
     const getAnnouncements = async () => {
@@ -33,8 +31,6 @@ export const Annoucements = () => {
     getAnnouncements();
 
   }, [setCurrentAnnouncement, id]);
-
-  console.log(currentAnnouncement)
 
   return (
     <div className='root'>

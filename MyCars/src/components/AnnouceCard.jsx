@@ -31,7 +31,7 @@ export function AnnouceCard({ title, description, estado, price, yearFabrication
             <div className="card h-100">
                 <img src={imageUrl} alt="" className='card-img-top' />
                  <div className="card-body">
-                    <h5 className="card-title">{title}</h5>
+                    <Link to={`${basePath}annoucement/${id}`}><h5 className="card-title">{title}</h5></Link>
                     <p className="card-text">{description}</p>
                     <h5>R$ {price}</h5>
 

@@ -71,6 +71,7 @@ export const Home = () => {
                 yearVehicle={announcement.anoModelo}
                 quilometragem={announcement.quilometragem}
                 imageUrl={announcement.images[0]}
+                id={announcement.id}
                 estado="Rio de Janeiro - RJ" />
             )
           })}
