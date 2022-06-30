@@ -14,6 +14,7 @@ export const Annoucements = () => {
   const [currentAnnouncement, setCurrentAnnouncement] = useState();
 
   const baseUrl = process.env.PUBLIC_URL + "/";
+
   const enviromnent = process.env.NODE_ENV;
   const basePath = (enviromnent === "production") ? baseUrl : "/";
 
@@ -35,7 +36,6 @@ export const Annoucements = () => {
   async function solicitarTestDrive() {
     console.log("oi");
   }
-
 
   return (
     <div className='root'>
@@ -74,7 +74,6 @@ export const Annoucements = () => {
           </div>
         </div>
       </div>
-
     </div>
   )
 }

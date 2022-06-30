@@ -7,6 +7,7 @@ import { Profile } from '../pages/Profile/Profile';
 import { PrivateRoutes } from '.';
 import { MyAnnouncements } from '../pages/MyAnnouncements/MyAnnouncements';
 import CreateAnnouncement from '../pages/CreateAnnouncement/CreateAnnouncement';
+import Annoucements from '../pages/Annoucements/Annoucements';
 
 export const AppRoutes = () => {
     const baseUrl = process.env.PUBLIC_URL + "/";
@@ -36,6 +37,8 @@ export const AppRoutes = () => {
                 </Route>
 
                 <Route path={basePath + "completeAccount"} exact element={<CompleteAccount />} />
+
+                <Route path={basePath + "annoucement/:id"} exact element={<Annoucements/>}/>
 
             </Routes>
         </BrowserRouter>
