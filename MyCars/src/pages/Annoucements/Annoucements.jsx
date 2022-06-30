@@ -13,7 +13,8 @@ export const Annoucements = () => {
   const { id } = useParams();
   const [currentAnnouncement, setCurrentAnnouncement] = useState();
 
-  const baseUrl = process.env.PUBLIC_URL+"/";
+  const baseUrl = process.env.PUBLIC_URL + "/";
+
   const enviromnent = process.env.NODE_ENV;
   const basePath = (enviromnent === "production") ? baseUrl : "/";
 
@@ -32,6 +33,10 @@ export const Annoucements = () => {
 
   }, [setCurrentAnnouncement, id]);
 
+  async function solicitarTestDrive() {
+    console.log("oi");
+  }
+
   return (
     <div className='root'>
       <Navbar current="home" />
@@ -46,7 +51,26 @@ export const Annoucements = () => {
             <p><h5>Cambio: </h5> {currentAnnouncement?.tipoCambio}</p>
             <p><h5> {currentAnnouncement?.tipoVeiculo}</h5></p>
             <Link to={basePath} type='button' className='btn btn-primary btn-block'>Fazer oferta</Link>
-            <Link to={basePath} type='button' className='btn btn-primary '>Test-drive</Link>
+            <button to={basePath} data-bs-toggle="modal" data-bs-target="#modal" type='button' className='btn btn-primary '>Test-drive</button>
+          </div>
+        </div>
+      </div>
+
+
+      <div className="modal" tabIndex="-1" id="modal">
+        <div className="modal-dialog">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">Test drive</h5>
+              <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div className="modal-body">
+              <p>test drive</p>
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-primary" data-bs-dismiss="modal" onClick={solicitarTestDrive} >Solicitar</button>
+              <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </div>
           </div>
         </div>
       </div>

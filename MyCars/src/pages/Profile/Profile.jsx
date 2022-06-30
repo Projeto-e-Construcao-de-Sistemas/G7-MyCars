@@ -41,6 +41,10 @@ export const Profile = () => {
     });
 
     async function onSubmit(userData) {
+        const loadingBtn = document.querySelector("#loading");
+        loadingBtn.classList.remove('hidden');
+        loadingBtn.parentElement.setAttribute("disabled", "disabled");
+
         const { name, phone, birthday, cpf, cep, rua, bairro, estado, cidade, complemento } = userData;
         await setDoc(doc(db, "users", userLogado.uid), {
             phone,
@@ -52,6 +56,9 @@ export const Profile = () => {
         await updateAddress(cep, rua, bairro, estado, cidade, complemento);
         sessionStorage.setItem("@AuthFirebase:user", JSON.stringify(auth.currentUser));
         document.querySelector('.alert').classList.remove('hidden');
+
+        loadingBtn.classList.add('hidden');
+        loadingBtn.parentElement.removeAttribute("disabled", "disabled");
     }
 
     async function updateAddress(cep, rua, bairro, estado, cidade, complemento) {
@@ -80,7 +87,7 @@ export const Profile = () => {
         await deleteDoc(doc(db, "address", userLogado.uid));
         await deleteDoc(doc(db, "users", userLogado.uid));
         signOutFromApp();
-        navigate(basePath+"login");
+        navigate(basePath + "login");
     }
 
     function checkCep(e) {
@@ -151,7 +158,7 @@ export const Profile = () => {
                 </div>
             </header>
             <div className="container-fluid">
-                <Sidebar current={"profile"}/>
+                <Sidebar current={"profile"} />
 
                 <main className="col-md-9 ms-sm-auto col-lg-10 px-md-4 ">
                     <h2 className='h2 pt-4'>Minha conta</h2>
@@ -286,7 +293,10 @@ export const Profile = () => {
 
                         <div className="container row d-flex justify-content-between pt-5">
                             <button type="submit" className='btn btn-success col-md-4' style={{ marginTop: '15px' }}>
-                                <FontAwesomeIcon icon={faSave} /> Salvar alterações</button>
+                                <span className="spinner-border spinner-border-sm hidden" id="loading" role="status" aria-hidden="true" style={{ marginRight: '15px' }}> </span>
+                                <FontAwesomeIcon icon={faSave} style={{ marginRight: '5px' }} />
+                                Salvar alterações
+                            </button>
                             <button data-bs-toggle="modal" data-bs-target="#modal" type="button" className='btn btn-danger col-md-3' style={{ marginTop: '15px' }}>
                                 <FontAwesomeIcon icon={faTrash} /> Deletar meu perfil</button>
                         </div>

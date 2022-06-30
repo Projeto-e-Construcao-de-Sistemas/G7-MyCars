@@ -1,11 +1,17 @@
-import { faDeleteLeft, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import "./ImageInput.css";
 
-export const ImageInput = ({ isFirst, setImageCount, imageCount, register, index, backgroundImage = "" }) => {
+export const ImageInput = ({ isFirst, setImageCount, imageCount, register, index, backgroundImage = "", unregister}) => {
 
-    const [image, setImage] = useState(backgroundImage);
+    const [image, setImage] = useState("");
+
+
+    useEffect(() => {
+      setImage(backgroundImage);
+    }, [backgroundImage, setImage]);
+    
 
     function showPreview(e) {
         const files = e.target.files;
@@ -22,13 +28,20 @@ export const ImageInput = ({ isFirst, setImageCount, imageCount, register, index
         }
     }
 
+    function deleteSelf(){
+        setImageCount(imageCount - 1);
+        const inputReference = document.querySelector(`#input-img-${index}`);
+        inputReference.value = "";
+        unregister(`fotosVeiculo[${index}]`);
+    }
+
     return (
         <div className="col-sm-4 imgUp">
             <div className="imagePreview" id="imagePreview" style={{ backgroundImage: `url(${image})` }}></div>
             <label className="btn btn-primary">
-                Adicioar imagem <input type="file" className="uploadFile img" style={{ width: "0px", height: "0px", overflow: "hidden" }} name={`fotoVeiculo[${index}]`} { ...register(`fotosVeiculo[${index}]`) } onChange={showPreview} />
+                Adicioar imagem <input type="file" id={`input-img-${index}`} className="uploadFile img" style={{ width: "0px", height: "0px", overflow: "hidden" }} name={`fotoVeiculo[${index}]`} { ...register(`fotosVeiculo[${index}]`) } onChange={showPreview} />
             </label>
-            {!isFirst && (<i className="del" onClick={() => setImageCount(imageCount - 1)}><FontAwesomeIcon icon={faTimes} /></i>)}
+            {!isFirst && (<i className="del" onClick={deleteSelf}><FontAwesomeIcon icon={faTimes} /></i>)}
         </div>
     )
 }

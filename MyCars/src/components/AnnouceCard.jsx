@@ -3,34 +3,46 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { deleteDoc, doc } from 'firebase/firestore'
 import { deleteObject, getStorage, listAll, ref } from 'firebase/storage'
 import React from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { db } from '../services/firebaseConfig'
 
 export function AnnouceCard({ title, description, estado, price, yearFabrication, yearVehicle, quilometragem, imageUrl, editable = false, id }) {
-    
+
     const storage = getStorage();
 
     const baseUrl = process.env.PUBLIC_URL + "/";
     const enviromnent = process.env.NODE_ENV;
     const basePath = (enviromnent === "production") ? baseUrl : "/";
 
-    async function deleteAnnounce(){
+    const [didLoad, setLoad] = useState(false);
+
+    const imgStyle = didLoad ? {} : {visibility: 'hidden'};
+    const spinnerStyle = !didLoad ? {marginTop: '30%', marginBottom: '30%'} : {visibility: 'hidden'};
+
+    async function deleteAnnounce() {
         const imagesRef = ref(storage, `images/${id}/`);
         const imgList = await listAll(imagesRef);
-        
-        for(let i = 0; i<imgList.items.length; i++){
+
+        for (let i = 0; i < imgList.items.length; i++) {
             await deleteObject(imgList.items[i]);
         }
 
         const announceDoc = doc(db, "announcement", id);
         await deleteDoc(announceDoc);
     }
-    
+
     return (
         <div className='col'>
             <div className="card h-100">
-                <img src={imageUrl} alt="" className='card-img-top' />
-                 <div className="card-body">
+                <img src={imageUrl} alt="" className='card-img-top' onLoad={() => setLoad(true)} style={imgStyle} />
+
+                <div className="text-center card-img-top" style={spinnerStyle}>
+                    <div className="  spinner-border" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+                <div className="card-body">
                     <Link to={`${basePath}annoucement/${id}`}><h5 className="card-title">{title}</h5></Link>
                     <p className="card-text">{description}</p>
                     <h5>R$ {price}</h5>
@@ -46,13 +58,13 @@ export function AnnouceCard({ title, description, estado, price, yearFabrication
                     ) : (
                         <div className="btn-group col-sm-12" role="group" aria-label="Basic mixed styles example">
                             <Link to={`${basePath}createAnnouncement/${id}`} className="btn btn-warning">
-                                <FontAwesomeIcon icon={faEdit} style={{marginRight: "10%"}}/>
+                                <FontAwesomeIcon icon={faEdit} style={{ marginRight: "10%" }} />
                                 Editar
-                                </Link>
+                            </Link>
                             <button type="button" className="btn btn-danger" onClick={deleteAnnounce}>
-                                <FontAwesomeIcon icon={faTrashAlt} style={{marginRight: "10%"}}/>
+                                <FontAwesomeIcon icon={faTrashAlt} style={{ marginRight: "10%" }} />
                                 Remover
-                                </button>
+                            </button>
                         </div>
                     )}
                 </div>
