@@ -43,7 +43,7 @@ export function AnnouceCard({ title, description, estado, price, yearFabrication
                     </div>
                 </div>
                 <div className="card-body">
-                    <h5 className="card-title">{title}</h5>
+                    <Link to={`${basePath}annoucement/${id}`}><h5 className="card-title">{title}</h5></Link>
                     <p className="card-text">{description}</p>
                     <h5>R$ {price}</h5>
 
