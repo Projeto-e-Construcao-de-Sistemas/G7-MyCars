@@ -10,13 +10,13 @@ export const Navbar = ({ current }) => {
     const { signOutFromApp, signed } = useContext(AuthenticationContext);
     const navigate = useNavigate();
 
-    const baseUrl = process.env.PUBLIC_URL+"/";
+    const baseUrl = process.env.PUBLIC_URL + "/";
     const enviromnent = process.env.NODE_ENV;
     const basePath = (enviromnent === "production") ? baseUrl : "/";
 
     async function signOut() {
         await signOutFromApp();
-        navigate(basePath+"login");
+        navigate(basePath + "login");
     }
 
     return (
@@ -29,19 +29,27 @@ export const Navbar = ({ current }) => {
                 <ul className="nav nav-pills col-12 col-md-auto mb-2 justify-content-center mb-md-0">
                     <li className="nav-item"><Link to={basePath} className={`nav-link px-2 ${current === 'home' ? 'active' : ''}`}>Home</Link></li>
                     <li className="nav-item"><Link to="#" className='nav-link'>Comprar</Link></li>
-                    <li className="nav-item"><Link to={basePath+"createAnnouncement/"} className='nav-link'>Vender</Link></li>
+                    <li className="nav-item"><Link to={basePath + "createAnnouncement/"} className='nav-link'>Vender</Link></li>
+
+                    {signed ? (
+                        <li className="nav-item"><Link to={basePath + "testsDrives/"} className='nav-link'>Solicitações de tests drives</Link></li>
+                    ) : (<></>)
+                    }
+
                 </ul>
                 <div className="col-md-3 text-end">
 
                     {!signed ? (
                         <>
-                            <Link to={basePath+"login"} className='btn btn-outline-primary me-2'>
+                            <Link to={basePath + "login"} className='btn btn-outline-primary me-2'>
                                 Fazer Login</Link>
-                            <Link to={basePath+"createAccount"} type='button' className='btn btn-primary'>Cadastre-se</Link>
+                            <Link to={basePath + "createAccount"} type='button' className='btn btn-primary'>Cadastre-se</Link>
+
                         </>
                     ) : (
                         <>
-                            <Link to={basePath+"profile"} type="button" className={`btn ${current === 'profile' ? 'btn-primary' : ' btn-outline-primary'}`} >
+
+                            <Link to={basePath + "profile"} type="button" className={`btn ${current === 'profile' ? 'btn-primary' : ' btn-outline-primary'}`} >
                                 <FontAwesomeIcon icon={faUser} /> Meu perfil </Link>
                             <button type="button" onClick={signOut} className='btn btn-outline-primary' style={{ marginLeft: "10px" }}>
                                 <FontAwesomeIcon icon={faRightFromBracket} /> Sair</button>
