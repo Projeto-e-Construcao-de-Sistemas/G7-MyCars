@@ -7,8 +7,6 @@ import { Navbar } from '../../components/Navbar';
 import { Link } from 'react-router-dom';
 import "./annoucements.css";
 
-import { Modal } from 'bootstrap';
-
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
@@ -90,9 +88,10 @@ export const Annoucements = () => {
     const testDriveData = {
       solicitante,
       nomeSolicitante: userLogado.displayName,
-      dateTime,
+      dateTime: dateTime.getTime(),
       annoucement: id,
-      approved: false
+      approved: false,
+      declined: false
     }
 
     await addDoc(collection(db, "testsDrive"), testDriveData);

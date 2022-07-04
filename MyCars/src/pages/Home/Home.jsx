@@ -64,7 +64,7 @@ export const Home = () => {
             return (
               <AnnouceCard
                 key={announcement.id}
-                title={announcement.modelo}
+                title={`${announcement.marca} ${announcement.modelo}`}
                 description={announcement.descricao}
                 price={announcement.valor}
                 yearFabrication={announcement.anoFabricacao}

@@ -2,11 +2,8 @@ import React, { useContext, useEffect, useState } from 'react';
 import { AuthenticationContext } from '../../context/authenticationContext';
 import { useNavigate } from 'react-router';
 import { Navbar } from '../../components/Navbar';
-import { AnnouceCard } from '../../components/AnnouceCard';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch } from '@fortawesome/free-solid-svg-icons';
 
-import { collection, onSnapshot, query, where } from 'firebase/firestore';
+import { collection, getDocs, onSnapshot, query, where } from 'firebase/firestore';
 import { db } from '../../services/firebaseConfig';
 import { TestDriveCard } from '../../components/TestDriveCard/TestDriveCard';
 
@@ -21,7 +18,7 @@ export function TestsDrives() {
     const basePath = (enviromnent === "production") ? baseUrl : "/";
 
     const [announcements, setAnnouncements] = useState([]);
-    const [cardsComponents, setCardsComponents] = useState([])
+    const [cardsComponents, setCardsComponents] = useState([]);
 
     const navigate = useNavigate();
 
@@ -35,101 +32,81 @@ export function TestsDrives() {
             }
         }
 
-
-        function getTestsDrives(callback) {
-
-            if (announcements.length != 0) return;   
+        function getAnnouncements() {
+            if (announcements.length != 0) return;
 
             const q = query(collection(db, "announcement"), where("dono", "==", `/users/${userLogado.uid}`));
             onSnapshot(q, (snapshot) => {
                 const announcementsData = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
-
-                for (let i = 0; i < announcementsData.length; i++) {
-                    const annoucement = announcementsData[i];
-
-                    const testDriveQuery = query(collection(db, "testsDrive"), where("annoucement", "==", `${annoucement.id}`));
-                    onSnapshot(testDriveQuery, (snapshot) => {
-                        const data = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
-                        annoucement.testsDrives = data;
-                    });
-                }
-
-                callback();
                 setAnnouncements(announcementsData);
-                // console.log(announcementsData);
             });
         }
-        
-        function createCardsComponents() {
-            announcements?.forEach((announcement) => {
-                announcement?.testsDrives?.forEach((testDrive) => {
-                    cardsComponents.push({
-                        title: announcement.modelo,
+
+
+        async function getTestsDrives() {
+            if (cardsComponents.length !== 0) return;
+
+            let cardData = [];
+
+            for (let i = 0; i < announcements.length; i++) {
+                const annoucement = announcements[i];
+
+                const testDriveQuery = query(collection(db, "testsDrive"), where("annoucement", "==", `${annoucement.id}`), where("approved", "==", false), where("declined", "==", false));
+                const testDriveSnapshot = await getDocs(testDriveQuery);
+
+                testDriveSnapshot.forEach((doc) => {
+
+                    const testDrive = ({ ...doc.data(), id: doc.id });
+
+                    const testDriveDate = new Date(testDrive.dateTime);
+                    const testDriveTime = `${testDriveDate.getHours()}:${testDriveDate.getMinutes()}`
+                    const testDriveDateTimeString = ` ${testDriveDate.toLocaleDateString('pt-BR')} às ${testDriveTime}`
+
+                    cardData.push({
+                        title: annoucement.marca+" "+annoucement.modelo,
                         solicitanteName: testDrive.nomeSolicitante,
-                        dateTime: testDrive.dateTime,
+                        dateTime: testDriveDateTimeString,
                         id: testDrive.id,
-                        imageUrl: announcement.images[0]
+                        imageUrl: annoucement.images[0]
                     });
                 });
-            })
+            }
+
+            if (cardData.length !== 0) setCardsComponents(cardData);
         }
 
 
         if (signed) {
             checkUserHasPassword();
-            getTestsDrives(createCardsComponents);
+            getAnnouncements();
+            getTestsDrives();
         }
 
- 
-    }, [navigate, userLogado, signed]);
+    }, [navigate, userLogado, signed, announcements, setCardsComponents, cardsComponents]);
 
-    // console.log(cardsComponents);
-
-
-    // if(announcements.length !== 0) createCardsComponents();
-
+    function onUpdate(){
+        window.location.reload();
+    }
 
     return (
         <div className='root'>
-            <Navbar current="home" />
+            <Navbar current="testDrive" />
             <div className="container">
 
                 <h3 className='text-center'>Solicitações de tests drives</h3>
                 <div className="row row-cols-1 row-cols-md-5 g-4 pt-5">
 
-                    {cardsComponents.map((cardComponent) => {
+                    {cardsComponents?.map((cardComponent) => {
                         return <TestDriveCard
                             title={cardComponent.title}
                             solicitanteName={cardComponent.solicitanteName}
-                            dateTime={"aa"}
+                            dateTime={cardComponent.dateTime}
                             imageUrl={cardComponent.imageUrl}
                             id={cardComponent.id}
                             key={cardComponent.id}
+                            onUpdate={onUpdate}
                         />
                     })}
-                    {/* {(() => {
-
-
-                        const cardComponents = [];
-
-                        for (let i = 0; i < cardsComponents.length; i++) {
-                            const cardComponent = cardsComponents[i];
-                            console.log(cardsComponents);
-                            cardComponents.push(
-                                <TestDriveCard
-                                    title={cardComponent.title}
-                                    solicitanteName={cardComponent.solicitanteName}
-                                    dateTime={cardComponent.dateTime}
-                                    imageUrl={cardComponent.imageUrl}
-                                    id={cardComponent.id}
-                                    key={cardComponent.id}
-                                />
-                            )
-
-                            return cardComponents;
-                        }
-                    })()} */}
-
                 </div>
             </div>
         </div>
