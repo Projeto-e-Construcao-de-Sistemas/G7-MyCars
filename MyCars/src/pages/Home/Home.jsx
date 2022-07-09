@@ -44,7 +44,7 @@ export const Home = () => {
     if (signed) {
       checkUserHasPassword();
     }
-  }, [navigate, userLogado, signed]);
+  }, [navigate, userLogado, signed, basePath]);
 
 
   return (

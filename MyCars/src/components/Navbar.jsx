@@ -28,7 +28,7 @@ export const Navbar = ({ current }) => {
 
                 <ul className="nav nav-pills col-12 col-md-auto mb-2 justify-content-center mb-md-0">
                     <li className="nav-item"><Link to={basePath} className={`nav-link px-2 ${current === 'home' ? 'active' : ''}`}>Home</Link></li>
-                    <li className="nav-item"><Link to="#" className='nav-link'>Comprar</Link></li>
+                    <li className="nav-item"><Link to="#" className={`nav-link px-2 ${current === 'comprar' ? 'active' : ''}`}>Comprar</Link></li>
                     <li className="nav-item"><Link to={basePath + "createAnnouncement/"} className='nav-link'>Vender</Link></li>
 
                     {signed ? (

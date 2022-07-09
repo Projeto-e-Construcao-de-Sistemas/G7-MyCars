@@ -2,26 +2,33 @@ import React, { useContext } from 'react';
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { db } from '../../services/firebaseConfig';
-import { addDoc, collection, doc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
+import { addDoc, collection, doc, getDoc } from 'firebase/firestore';
 import { Navbar } from '../../components/Navbar';
-import { Link } from 'react-router-dom';
 import "./annoucements.css";
 
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
 import { AuthenticationContext } from '../../context/authenticationContext';
+import { Carousel } from '../../components/Carousel/Carousel';
+import { ThemeContext } from '../../App';
+
 
 export const Annoucements = () => {
 
   const { id } = useParams();
 
   const { signed } = useContext(AuthenticationContext);
+  const {theme} = useContext(ThemeContext);
+
   const userLogado = JSON.parse(sessionStorage.getItem("@AuthFirebase:user"));
+
+  const fipeAPI = "https://veiculos.fipe.org.br/api/veiculos";
 
   const navigate = useNavigate();
 
   const [currentAnnouncement, setCurrentAnnouncement] = useState();
+  const [valorFipe, setValorFipe] = useState();
   const [validateState, setValidateState] = useState("");
 
   const baseUrl = process.env.PUBLIC_URL + "/";
@@ -37,7 +44,7 @@ export const Annoucements = () => {
   });
 
 
-  const { register, handleSubmit, setValue, unregister, formState: { errors } } = useForm({
+  const { register, handleSubmit, formState: { errors } } = useForm({
     resolver: yupResolver(schema)
   });
 
@@ -62,10 +69,114 @@ export const Annoucements = () => {
 
     getAnnouncements();
 
+
+    async function getFipeValue() {
+      const marca = await loadMarca();
+      const modelo = await loadModelo(marca[0].Value);
+      const ano = await laodAnos(marca[0].Value, modelo.Value);
+      const veiculo = await loadVeiculo(marca[0].Value, modelo.Value, ano.Value);
+
+      setValorFipe(veiculo.Valor);
+    }
+
+    async function loadVeiculo(codMarca, codModelo, codAno) {
+
+
+      const [anoModelo, codigoTipoCombustivel] = codAno.split("-");
+
+      const form = new FormData();
+      form.append("codigoTabelaReferencia", 287);
+      form.append("codigoTipoVeiculo", 1);
+      form.append("codigoMarca", codMarca);
+      form.append("codigoModelo", codModelo);
+      form.append("ano", codAno);
+      form.append("anoModelo", anoModelo);
+      form.append("codigoTipoCombustivel", codigoTipoCombustivel);
+      form.append("tipoConsulta", "tradicional");
+
+      const response = await fetch(`${fipeAPI}/ConsultarValorComTodosParametros`, {
+        method: 'POST',
+        body: form
+      });
+
+      const veiculo = await response.json();
+
+      return veiculo;
+    }
+
+    async function laodAnos(codMarca, codModelo) {
+
+      const form = new FormData();
+      form.append("codigoTabelaReferencia", 287);
+      form.append("codigoTipoVeiculo", 1);
+      form.append("codigoMarca", codMarca);
+      form.append("codigoModelo", codModelo);
+
+      const response = await fetch(`${fipeAPI}/ConsultarAnoModelo`, {
+        method: 'POST',
+        body: form
+      });
+
+      const anos = await response.json();
+
+      const anosFiltered = anos.filter((ano) => {
+        return ano.Label.toLowerCase().includes(currentAnnouncement.anoModelo.toLowerCase())
+      });
+
+
+      return (anosFiltered.length === 0) ? anos[0] : anosFiltered[0];
+    }
+
+
+    async function loadModelo(codMarca) {
+
+      const form = new FormData();
+      form.append("codigoTabelaReferencia", 287);
+      form.append("codigoTipoVeiculo", 1);
+      form.append("codigoMarca", codMarca);
+
+      const response = await fetch(`${fipeAPI}/ConsultarModelos`, {
+        method: 'POST',
+        body: form
+      });
+      const modelos = await response.json();
+
+
+      const modelosFiltered = modelos.Modelos.filter((item) => {
+        return item.Label.toLowerCase().includes(currentAnnouncement.modelo.toLowerCase());
+      });
+
+      return modelosFiltered[0];
+    }
+
+    async function loadMarca() {
+      const form = new FormData();
+      form.append("codigoTabelaReferencia", 287);
+      form.append("codigoTipoVeiculo", 1);
+
+      const response = await fetch(`${fipeAPI}/ConsultarMarcas`, {
+        method: 'POST',
+        body: form
+      });
+      const marcas = await response.json();
+
+      const marcaAnuncio = marcas?.filter((marca) => {
+        if (currentAnnouncement.marca.toLowerCase() === "chevrolet") {
+          return marca.Label.toLowerCase() === `gm - ${currentAnnouncement.marca.toLowerCase()}`;
+        }
+
+        return marca.Label.toLowerCase() === currentAnnouncement.marca.toLowerCase();
+      });
+
+      return marcaAnuncio;
+    }
+
+    getFipeValue();
+
     if (signed) {
       checkUserHasPassword();
     }
-  }, [setCurrentAnnouncement, id]);
+  }, [setCurrentAnnouncement, id, currentAnnouncement, setValorFipe, basePath, navigate, userLogado, signed]);
 
   async function onSubmit(testDrive) {
     const { date, time } = testDrive;
@@ -103,34 +214,81 @@ export const Annoucements = () => {
 
   return (
     <div className='root'>
-      <Navbar current="home" />
+      <Navbar current="comprar" />
 
       <div className="container">
 
-        <div className="alert alert-success hidden" id="success" role="alert">
-          Test drive solicitado com sucesso!
-        </div>
-      </div>
-      <div className='announce d-flex flex-column justify-content-center pt-5 pb-2 mx-auto'>
-        <div className='d-flex justify-content-center'>
-          <img src={currentAnnouncement?.images[0]} alt="" className='' />
-          <div className='info border d-flex flex-wrap justify-content-between'>
+        <Carousel images={currentAnnouncement?.images} title="Carro pika" />
 
-            <h2>{currentAnnouncement?.marca} {currentAnnouncement?.modelo} {currentAnnouncement?.anoModelo}</h2>
-            <p id='descricao'>{currentAnnouncement?.descricao}</p>
-            <p><h5>Quilometragem: </h5>{currentAnnouncement?.quilometragem} Km</p>
-            <p><h5>Cor: </h5> {currentAnnouncement?.cor}</p>
-            <p><h5>Cambio: </h5> {currentAnnouncement?.tipoCambio}</p>
-            <p><h5> {currentAnnouncement?.tipoVeiculo}</h5></p>
-            {signed ? (
-              <div>
-                <Link to={basePath} type='button' className='btn btn-primary btn-block'>Fazer oferta</Link>
-                <button to={basePath} data-bs-toggle="modal" data-bs-target="#modal" type='button' className='btn btn-primary '>Test-drive</button>
+        <div className="row align-items-md-stretch">
+          <div className="col-md-8">
+            <div className={`h-100 p-5 bg-${theme} ${(theme === "dark") ? "text-white" : ""} border rounded-3`}>
+              <h2 >{`${currentAnnouncement?.marca} ${currentAnnouncement?.modelo}`}</h2>
+
+              <ul className='list-group list-group-horizontal'>
+                <li className={`list-group-item  ${(theme === "dark") ? "text-white" : ""}`}>
+                  <h5>Ano:</h5>
+                  <strong>{`${currentAnnouncement?.anoModelo}/${currentAnnouncement?.anoFabricacao}`}</strong>
+                </li>
+
+                <li className={`list-group-item  ${(theme === "dark") ? "text-white" : ""}`}>
+                  <h5>Cor:</h5>
+                  <strong>{currentAnnouncement?.cor}</strong>
+                </li>
+
+                <li className={`list-group-item  ${(theme === "dark") ? "text-white" : ""}`}>
+                  <h5>Final da placa:</h5>
+                  <strong>{currentAnnouncement?.placa.charAt(currentAnnouncement?.placa?.length - 1)}</strong>
+                </li>
+
+                <li className={`list-group-item  ${(theme === "dark") ? "text-white" : ""}`}>
+                  <h5>Quilometragem:</h5>
+                  <strong>{currentAnnouncement?.quilometragem}Km</strong>
+                </li>
+
+                <li className={`list-group-item  ${(theme === "dark") ? "text-white" : ""}`}>
+                  <h5>Tipo de câmbio:</h5>
+                  <strong>{currentAnnouncement?.tipoCambio}</strong>
+                </li>
+              </ul>
+
+              <div className="row pt-3">
+                <strong>Descrição do anúncio:</strong>
+                <p>{currentAnnouncement?.descricao}</p>
               </div>
-            ) : (<></>)
-            }
+
+              <div className="row justify-content-between">
+                <div className="col-sm-6">
+                  <h3 className='pt-3'>Valor anunciado:</h3>
+                  <h3> R$ {currentAnnouncement?.valor}</h3>
+                </div>
+                <div className="col-sm-6">
+                  <h3 className='pt-3'>Valor da tabela Fipe: </h3>
+                  <h3>{valorFipe}</h3>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <div className="col-md-4">
+            <div className={`h-100 p-5 bg-${theme} border rounded-3  ${(theme === "dark") ? "text-white" : ""} `}>
+
+              <div className="pb-5">
+                <h4>Gostou do veículo? Que tal agendar um test drive?</h4>
+                <button class="btn btn-outline-secondary col-sm-12" type="button" data-bs-toggle="modal" data-bs-target="#modal">Clique aqui para agendar um test drive!</button>
+              </div>
+
+              <div className="">
+
+                <h4>Ou se preferir, mande uma mensagem ao vendedor!</h4>
+                <button class="btn btn-outline-secondary col-sm-12" type="button">Enive uma mensagem ao vendedor!</button>
+              </div>
+            </div>
           </div>
         </div>
+
+
       </div>
 
 

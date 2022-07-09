@@ -1,19 +1,11 @@
-import { faBan, faCheck, faEdit, faLocationDot, faTrashAlt } from '@fortawesome/free-solid-svg-icons'
+import { faBan, faCheck} from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { deleteDoc, doc, updateDoc } from 'firebase/firestore'
-import { deleteObject, getStorage, listAll, ref } from 'firebase/storage'
+import {  doc, updateDoc } from 'firebase/firestore'
 import React from 'react'
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
 import { db } from '../../services/firebaseConfig'
 
 export function TestDriveCard({ title, solicitanteName, dateTime, imageUrl, id, onUpdate}) {
-
-    const storage = getStorage();
-
-    const baseUrl = process.env.PUBLIC_URL + "/";
-    const enviromnent = process.env.NODE_ENV;
-    const basePath = (enviromnent === "production") ? baseUrl : "/";
 
     const [didLoad, setLoad] = useState(false);
 
