@@ -33,7 +33,7 @@ export function TestsDrives() {
         }
 
         function getAnnouncements() {
-            if (announcements.length != 0) return;
+            if (announcements.length !== 0) return;
 
             const q = query(collection(db, "announcement"), where("dono", "==", `/users/${userLogado.uid}`));
             onSnapshot(q, (snapshot) => {
@@ -82,7 +82,7 @@ export function TestsDrives() {
             getTestsDrives();
         }
 
-    }, [navigate, userLogado, signed, announcements, setCardsComponents, cardsComponents]);
+    }, [navigate, userLogado, signed, announcements, setCardsComponents, cardsComponents, basePath]);
 
     function onUpdate(){
         window.location.reload();

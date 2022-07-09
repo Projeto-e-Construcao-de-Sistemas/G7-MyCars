@@ -8,3 +8,8 @@
     width:15%;
     padding-right: 2%;
 }
+
+.list-group-item{
+    border: 0;
+    background-color: transparent;
+}
