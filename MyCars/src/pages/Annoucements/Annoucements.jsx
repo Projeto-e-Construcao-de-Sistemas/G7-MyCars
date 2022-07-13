@@ -12,6 +12,7 @@ import * as yup from "yup";
 import { AuthenticationContext } from '../../context/authenticationContext';
 import { Carousel } from '../../components/Carousel/Carousel';
 import { ThemeContext } from '../../App';
+import { Link } from 'react-router-dom';
 
 
 export const Annoucements = () => {
@@ -19,7 +20,7 @@ export const Annoucements = () => {
   const { id } = useParams();
 
   const { signed } = useContext(AuthenticationContext);
-  const {theme} = useContext(ThemeContext);
+  const { theme } = useContext(ThemeContext);
 
   const userLogado = JSON.parse(sessionStorage.getItem("@AuthFirebase:user"));
 
@@ -276,13 +277,21 @@ export const Annoucements = () => {
 
               <div className="pb-5">
                 <h4>Gostou do veículo? Que tal agendar um test drive?</h4>
-                <button class="btn btn-outline-secondary col-sm-12" type="button" data-bs-toggle="modal" data-bs-target="#modal">Clique aqui para agendar um test drive!</button>
+                {(signed) ?
+                  (<button class="btn btn-outline-secondary col-sm-12" type="button" data-bs-toggle="modal" data-bs-target="#modal">Clique aqui para agendar um test drive!</button>)
+                  :
+                  (<Link to={basePath + "login"} class="btn btn-outline-secondary col-sm-12">Clique aqui para agendar um test drive!</Link>)
+                }
               </div>
 
               <div className="">
 
                 <h4>Ou se preferir, mande uma mensagem ao vendedor!</h4>
-                <button class="btn btn-outline-secondary col-sm-12" type="button">Enive uma mensagem ao vendedor!</button>
+                {(signed) ?
+                  (<Link to={`${basePath}messageAnnouncement/${id}`} class="btn btn-outline-secondary col-sm-12" type="button">Enive uma mensagem ao vendedor!</Link>)
+                  :
+                  (<Link to={basePath+"login"} class="btn btn-outline-secondary col-sm-12">Enive uma mensagem ao vendedor!</Link>)
+                }
               </div>
             </div>
           </div>
