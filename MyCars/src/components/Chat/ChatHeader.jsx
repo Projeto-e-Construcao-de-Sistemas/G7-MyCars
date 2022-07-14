@@ -5,7 +5,7 @@ export default function ChatHeader({name, img, owner=""}) {
         <div className="chat-header clearfix">
             <div className="row">
                 <div className="col-lg-6">
-                    <a href="javascript:void(0);" data-toggle="modal" data-target="#view_info">
+                    <a href="#" data-toggle="modal" data-target="#view_info">
                         <img src={img} alt="avatar" />
                     </a>
                     <div className="chat-about">
