@@ -33,7 +33,11 @@ export default function MessageAnnouncement() {
 
             const announcementDoc = doc(db, "announcement", id);
             const response = (await getDoc(announcementDoc)).data();
-            setCurrentAnnouncement(response)
+            setCurrentAnnouncement(response);
+        
+            if(response.dono.split('/')[2] === userLogado.uid){
+                navigate(basePath+"annoucement/"+id);
+            }
         }
 
         function checkUserHasPassword() {

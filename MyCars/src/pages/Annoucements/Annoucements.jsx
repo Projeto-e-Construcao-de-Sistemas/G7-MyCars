@@ -31,6 +31,7 @@ export const Annoucements = () => {
   const [currentAnnouncement, setCurrentAnnouncement] = useState();
   const [valorFipe, setValorFipe] = useState();
   const [validateState, setValidateState] = useState("");
+  const [userIsOwner, setuserIsOwner] = useState(false);
 
   const baseUrl = process.env.PUBLIC_URL + "/";
 
@@ -58,7 +59,9 @@ export const Annoucements = () => {
 
       const announcementDoc = doc(db, "announcement", id);
       const response = (await getDoc(announcementDoc)).data();
-      setCurrentAnnouncement(response)
+      setCurrentAnnouncement(response);
+
+      setuserIsOwner(currentAnnouncement?.dono.split('/')[2] === userLogado.uid)
     }
 
     function checkUserHasPassword() {
@@ -278,7 +281,7 @@ export const Annoucements = () => {
               <div className="pb-5">
                 <h4>Gostou do veículo? Que tal agendar um test drive?</h4>
                 {(signed) ?
-                  (<button class="btn btn-outline-secondary col-sm-12" type="button" data-bs-toggle="modal" data-bs-target="#modal">Clique aqui para agendar um test drive!</button>)
+                  (<button className="btn btn-outline-secondary col-sm-12" type="button" data-bs-toggle={userIsOwner ? "modal": "#"} data-bs-target={userIsOwner ? "#modal": "#"} >Clique aqui para agendar um test drive!</button>)
                   :
                   (<Link to={basePath + "login"} class="btn btn-outline-secondary col-sm-12">Clique aqui para agendar um test drive!</Link>)
                 }
@@ -288,9 +291,9 @@ export const Annoucements = () => {
 
                 <h4>Ou se preferir, mande uma mensagem ao vendedor!</h4>
                 {(signed) ?
-                  (<Link to={`${basePath}messageAnnouncement/${id}`} class="btn btn-outline-secondary col-sm-12" type="button">Enive uma mensagem ao vendedor!</Link>)
+                  (<Link to={`${basePath}messageAnnouncement/${id}`} className="btn btn-outline-secondary col-sm-12" type="button">Enive uma mensagem ao vendedor!</Link>)
                   :
-                  (<Link to={basePath+"login"} class="btn btn-outline-secondary col-sm-12">Enive uma mensagem ao vendedor!</Link>)
+                  (<Link to={basePath + "login"} className="btn btn-outline-secondary col-sm-12">Enive uma mensagem ao vendedor!</Link>)
                 }
               </div>
             </div>
