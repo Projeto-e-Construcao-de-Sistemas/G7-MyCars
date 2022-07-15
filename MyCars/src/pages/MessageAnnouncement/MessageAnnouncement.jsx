@@ -35,9 +35,7 @@ export default function MessageAnnouncement() {
             const response = (await getDoc(announcementDoc)).data();
             setCurrentAnnouncement(response);
         
-            if(response.dono.split('/')[2] === userLogado.uid){
-                navigate(basePath+"annoucement/"+id);
-            }
+      
         }
 
         function checkUserHasPassword() {
@@ -60,7 +58,7 @@ export default function MessageAnnouncement() {
             <Navbar current="comprar" />
 
             <div className="container">
-                <Chat announcement={currentAnnouncement}/>
+                <Chat announcement={currentAnnouncement} announcementId={id} />
 
             </div>
         </div>

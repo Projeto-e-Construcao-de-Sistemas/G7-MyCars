@@ -90,7 +90,7 @@ body{
 
 .chat .chat-history {
     padding: 20px;
-    height: 70vh;
+    height: 60vh;
     overflow-y: scroll;
     border-bottom: 2px solid #fff
 }
