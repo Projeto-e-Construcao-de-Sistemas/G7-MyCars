@@ -165,7 +165,7 @@ export const Annoucements = () => {
       const marcas = await response.json();
 
       const marcaAnuncio = marcas?.filter((marca) => {
-        if (currentAnnouncement.marca.toLowerCase() === "chevrolet") {
+        if (currentAnnouncement?.marca.toLowerCase() === "chevrolet") {
           return marca.Label.toLowerCase() === `gm - ${currentAnnouncement.marca.toLowerCase()}`;
         }
 

@@ -10,7 +10,7 @@ export default function ChatHeader({name, img, owner=""}) {
                     </a>
                     <div className="chat-about">
                         <h6 className="m-b-0">{name}</h6>
-                        <small>Last seen: 2 hours ago</small>
+                        <small>{owner}</small>
                     </div>
                 </div>
             </div>
