@@ -1,8 +1,6 @@
 import { faPaperPlane } from '@fortawesome/free-regular-svg-icons';
-import { faSearch } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { addDoc, collection, doc, getDoc, getDocs, onSnapshot, orderBy, query, Timestamp, where } from 'firebase/firestore';
-import { ref } from 'firebase/storage';
+import { addDoc, collection, doc, getDoc, onSnapshot, query, Timestamp, where } from 'firebase/firestore';
 import React, { useEffect } from 'react'
 import { useState } from 'react';
 import { db } from '../../services/firebaseConfig';
@@ -15,19 +13,19 @@ import OtherMessage from './OtherMessage';
 
 export default function Chat({ announcement, announcementId }) {
 
-    const [placeHolder, setplaceHolder] = useState([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
-
     const [messages, setMessages] = useState([]);
     const userLogado = JSON.parse(sessionStorage.getItem("@AuthFirebase:user"));
-
     const [txtMessage, setTxtMessage] = useState("");
 
+    const [scrollHeight, setScrollHeight] = useState(0);
+
     function scrollChat() {
-
         const chatHistory = document.querySelector("#chat-history");
-        chatHistory.scrollTo(0, chatHistory.scrollHeight);
+        if (scrollHeight !== chatHistory.scrollHeight) {
+            chatHistory.scrollTo(0, chatHistory.scrollHeight);
+            setScrollHeight(chatHistory.scrollHeight);
+        }
     }
-
 
     useEffect(() => {
 
@@ -40,18 +38,24 @@ export default function Chat({ announcement, announcementId }) {
                     return x.timestamp.toDate() < y.timestamp.toDate() ? 1 : -1
                 }).reverse();
 
-                setMessages(messagesSorted);
+                const msgFiltered = messagesSorted.filter((msg)=>{
+                    return msg.idFrom === userLogado.uid || msg.idTo === userLogado.uid;
+                });
+
+                setMessages(msgFiltered);
 
             });
         }
 
         getMessages();
-
         scrollChat();
-    }, [scrollChat]);
+
+    }, [scrollChat, announcementId]);
+
 
     async function sendMessage() {
 
+        if (txtMessage === "") return;
         let nameTo = "";
         let idTo = "";
 
@@ -60,8 +64,8 @@ export default function Chat({ announcement, announcementId }) {
             const ownerData = (await getDoc(ownerDoc)).data();
             nameTo = ownerData.name;
             idTo = announcement.dono;
-        }else{
-            const msgFiltered = messages.filter((msg)=>{
+        } else {
+            const msgFiltered = messages.filter((msg) => {
                 return msg.idFrom.id !== ` ${userLogado.uid}`;
             });
 
@@ -69,7 +73,7 @@ export default function Chat({ announcement, announcementId }) {
             nameTo = msgFiltered[0].nameFrom;
         }
 
-        
+
         const messageData = {
             message: txtMessage,
             timestamp: Timestamp.fromDate(new Date()),
@@ -80,7 +84,7 @@ export default function Chat({ announcement, announcementId }) {
             idTo
         }
 
-        await addDoc(collection(db, "messageNegociation"), messageData);
+        addDoc(collection(db, "messageNegociation"), messageData);
         setTxtMessage("");
         scrollChat();
     }

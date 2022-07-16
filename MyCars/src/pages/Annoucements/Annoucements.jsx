@@ -216,6 +216,18 @@ export const Annoucements = () => {
     setValidateState("");
   }
 
+  let linkChat;
+  if (signed) {
+    if (currentAnnouncement?.dono.split('/')[2] === userLogado.uid) {
+      linkChat = <Link to={`${basePath}messageAnnouncement/${id}`} className="btn btn-outline-secondary col-sm-12" type="button">Visualizar mensagens do anúncio.</Link>;
+    } else {
+      linkChat = <Link to={`${basePath}messageAnnouncement/${id}`} className="btn btn-outline-secondary col-sm-12" type="button">Enive uma mensagem ao vendedor!</Link>;
+
+    }
+  } else {
+    linkChat = <Link to={basePath + "login"} className="btn btn-outline-secondary col-sm-12">Enive uma mensagem ao vendedor!</Link>;
+  }
+
   return (
     <div className='root'>
       <Navbar current="comprar" />
@@ -281,7 +293,7 @@ export const Annoucements = () => {
               <div className="pb-5">
                 <h4>Gostou do veículo? Que tal agendar um test drive?</h4>
                 {(signed) ?
-                  (<button className="btn btn-outline-secondary col-sm-12" type="button" data-bs-toggle={userIsOwner ? "modal": "#"} data-bs-target={userIsOwner ? "#modal": "#"} >Clique aqui para agendar um test drive!</button>)
+                  (<button className="btn btn-outline-secondary col-sm-12" type="button" data-bs-toggle={userIsOwner ? "modal" : "#"} data-bs-target={userIsOwner ? "#modal" : "#"} >Clique aqui para agendar um test drive!</button>)
                   :
                   (<Link to={basePath + "login"} class="btn btn-outline-secondary col-sm-12">Clique aqui para agendar um test drive!</Link>)
                 }
@@ -290,11 +302,7 @@ export const Annoucements = () => {
               <div className="">
 
                 <h4>Ou se preferir, mande uma mensagem ao vendedor!</h4>
-                {(signed) ?
-                  (<Link to={`${basePath}messageAnnouncement/${id}`} className="btn btn-outline-secondary col-sm-12" type="button">Enive uma mensagem ao vendedor!</Link>)
-                  :
-                  (<Link to={basePath + "login"} className="btn btn-outline-secondary col-sm-12">Enive uma mensagem ao vendedor!</Link>)
-                }
+                {linkChat}
               </div>
             </div>
           </div>
