@@ -6,6 +6,8 @@ import { Navbar } from '../../components/Navbar';
 import { collection, getDocs, onSnapshot, query, where } from 'firebase/firestore';
 import { db } from '../../services/firebaseConfig';
 import { TestDriveCard } from '../../components/TestDriveCard/TestDriveCard';
+import { Sidebar } from '../../components/Sidebar';
+import { Link } from 'react-router-dom';
 
 
 export function TestsDrives() {
@@ -63,7 +65,7 @@ export function TestsDrives() {
                     const testDriveDateTimeString = ` ${testDriveDate.toLocaleDateString('pt-BR')} às ${testDriveTime}`
 
                     cardData.push({
-                        title: annoucement.marca+" "+annoucement.modelo,
+                        title: annoucement.marca + " " + annoucement.modelo,
                         solicitanteName: testDrive.nomeSolicitante,
                         dateTime: testDriveDateTimeString,
                         id: testDrive.id,
@@ -84,30 +86,41 @@ export function TestsDrives() {
 
     }, [navigate, userLogado, signed, announcements, setCardsComponents, cardsComponents, basePath]);
 
-    function onUpdate(){
+    function onUpdate() {
         window.location.reload();
     }
 
     return (
         <div className='root'>
-            <Navbar current="testDrive" />
-            <div className="container">
-
-                <h3 className='text-center'>Solicitações de tests drives</h3>
-                <div className="row row-cols-1 row-cols-md-5 g-4 pt-5">
-
-                    {cardsComponents?.map((cardComponent) => {
-                        return <TestDriveCard
-                            title={cardComponent.title}
-                            solicitanteName={cardComponent.solicitanteName}
-                            dateTime={cardComponent.dateTime}
-                            imageUrl={cardComponent.imageUrl}
-                            id={cardComponent.id}
-                            key={cardComponent.id}
-                            onUpdate={onUpdate}
-                        />
-                    })}
+            <header className='navbar navbar-light sticky-top flex-md-nowrap p-0 shadow'>
+                <Link to={basePath} className='navbar-brand col-md-3 col-lg-2 me-0 px-3 '>MyCars</Link>
+                <div className="navbar-nav">
+                    <div className="nav-item text-nowrap">
+                        <Link to={basePath} className="nav-link px-3">{userLogado.displayName}</Link>
+                    </div>
                 </div>
+            </header>
+            <div className="container-fluid">
+                <Sidebar current={"testDrive"} />
+
+                <main className="col-md-9 ms-sm-auto col-lg-10 px-md-4 ">
+                    <h3 className='text-center pt-5'>Solicitações de tests drives</h3>
+                    <div className="row row-cols-1 row-cols-md-5 g-4 pt-5">
+
+                        {cardsComponents?.map((cardComponent) => {
+                            return <TestDriveCard
+                                title={cardComponent.title}
+                                solicitanteName={cardComponent.solicitanteName}
+                                dateTime={cardComponent.dateTime}
+                                imageUrl={cardComponent.imageUrl}
+                                id={cardComponent.id}
+                                key={cardComponent.id}
+                                onUpdate={onUpdate}
+                            />
+                        })}
+
+                    </div>
+                </main>
             </div>
         </div>
 

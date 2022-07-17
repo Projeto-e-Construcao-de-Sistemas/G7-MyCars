@@ -31,11 +31,6 @@ export const Navbar = ({ current }) => {
                     <li className="nav-item"><Link to="#" className={`nav-link px-2 ${current === 'comprar' ? 'active' : ''}`}>Comprar</Link></li>
                     <li className="nav-item"><Link to={basePath + "createAnnouncement/"} className='nav-link'>Vender</Link></li>
 
-                    {signed ? (
-                        <li className="nav-item"><Link to={basePath + "testsDrives/"} className={`nav-link px-2 ${current === 'testDrive' ? 'active' : ''}`}>Solicitações de tests drives</Link></li>
-                    ) : (<></>)
-                    }
-
                 </ul>
                 <div className="col-md-3 text-end">
 

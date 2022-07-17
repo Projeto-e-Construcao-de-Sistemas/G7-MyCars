@@ -61,7 +61,7 @@ export const Annoucements = () => {
       const response = (await getDoc(announcementDoc)).data();
       setCurrentAnnouncement(response);
 
-      setuserIsOwner(currentAnnouncement?.dono.split('/')[2] === userLogado.uid)
+      setuserIsOwner(currentAnnouncement?.dono.split('/')[2] === userLogado.uid);
     }
 
     function checkUserHasPassword() {
@@ -217,15 +217,20 @@ export const Annoucements = () => {
   }
 
   let linkChat;
+  let linkTestDrive;
   if (signed) {
     if (currentAnnouncement?.dono.split('/')[2] === userLogado.uid) {
+
       linkChat = <Link to={`${basePath}myNegociations`} className="btn btn-outline-secondary col-sm-12" type="button">Visualizar mensagens do anúncio.</Link>;
+      linkTestDrive = <button className="btn btn-outline-secondary col-sm-12" type="button" data-bs-toggle="#" data-bs-target="#">Clique aqui para agendar um test drive!</button>
+    
     } else {
       linkChat = <Link to={`${basePath}messageAnnouncement/${id}`} className="btn btn-outline-secondary col-sm-12" type="button">Enive uma mensagem ao vendedor!</Link>;
-
+      linkTestDrive = <button className="btn btn-outline-secondary col-sm-12" type="button" data-bs-toggle={"modal"} data-bs-target="#modal" >Clique aqui para agendar um test drive!</button>
     }
   } else {
     linkChat = <Link to={basePath + "login"} className="btn btn-outline-secondary col-sm-12">Enive uma mensagem ao vendedor!</Link>;
+    linkTestDrive = <Link to={basePath + "login"} className="btn btn-outline-secondary col-sm-12">Clique aqui para agendar um test drive!</Link>
   }
 
   return (
@@ -292,11 +297,7 @@ export const Annoucements = () => {
 
               <div className="pb-5">
                 <h4>Gostou do veículo? Que tal agendar um test drive?</h4>
-                {(signed) ?
-                  (<button className="btn btn-outline-secondary col-sm-12" type="button" data-bs-toggle={userIsOwner ? "modal" : "#"} data-bs-target={userIsOwner ? "#modal" : "#"} >Clique aqui para agendar um test drive!</button>)
-                  :
-                  (<Link to={basePath + "login"} className="btn btn-outline-secondary col-sm-12">Clique aqui para agendar um test drive!</Link>)
-                }
+                {linkTestDrive}
               </div>
 
               <div className="">
