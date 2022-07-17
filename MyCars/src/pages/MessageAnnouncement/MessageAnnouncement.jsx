@@ -30,8 +30,7 @@ export default function MessageAnnouncement() {
     useEffect(() => {
 
         const getAnnouncements = async () => {
-
-            if (!id || currentAnnouncement) return
+            if (!id || currentAnnouncement) return;
 
             const announcementDoc = doc(db, "announcement", id);
             const response = (await getDoc(announcementDoc)).data();
@@ -57,7 +56,6 @@ export default function MessageAnnouncement() {
 
         
         async function getMessages() {
-            console.log(messages.length);
             if(messages.length !== 0) return;
 
             const messagesQuery = query(collection(db, "messageNegociation"), where("announcement", "==", `${id}`));
@@ -94,12 +92,11 @@ export default function MessageAnnouncement() {
                 <div className="row clearfix">
                     <div className="col-lg-12">
                         <div className="card chat-app">
+
                             <PeopleList listAnnouncements={[currentAnnouncement]} />
 
                             <Chat announcement={currentAnnouncement} announcementId={id} messagesChat={messages} />
                         </div>
-
-
                     </div>
                 </div>
             </div>

@@ -76,9 +76,9 @@ export const Annoucements = () => {
 
     async function getFipeValue() {
       const marca = await loadMarca();
-      const modelo = await loadModelo(marca[0].Value);
-      const ano = await laodAnos(marca[0].Value, modelo.Value);
-      const veiculo = await loadVeiculo(marca[0].Value, modelo.Value, ano.Value);
+      const modelo = await loadModelo(marca[0]?.Value);
+      const ano = await laodAnos(marca[0]?.Value, modelo.Value);
+      const veiculo = await loadVeiculo(marca[0]?.Value, modelo.Value, ano.Value);
 
       setValorFipe(veiculo.Valor);
     }
@@ -146,7 +146,7 @@ export const Annoucements = () => {
       const modelos = await response.json();
 
 
-      const modelosFiltered = modelos.Modelos.filter((item) => {
+      const modelosFiltered = modelos?.Modelos?.filter((item) => {
         return item.Label.toLowerCase().includes(currentAnnouncement.modelo.toLowerCase());
       });
 
@@ -169,7 +169,7 @@ export const Annoucements = () => {
           return marca.Label.toLowerCase() === `gm - ${currentAnnouncement.marca.toLowerCase()}`;
         }
 
-        return marca.Label.toLowerCase() === currentAnnouncement.marca.toLowerCase();
+        return marca?.Label.toLowerCase() === currentAnnouncement?.marca.toLowerCase();
       });
 
       return marcaAnuncio;
@@ -219,7 +219,7 @@ export const Annoucements = () => {
   let linkChat;
   if (signed) {
     if (currentAnnouncement?.dono.split('/')[2] === userLogado.uid) {
-      linkChat = <Link to={`${basePath}messageAnnouncement/${id}`} className="btn btn-outline-secondary col-sm-12" type="button">Visualizar mensagens do anúncio.</Link>;
+      linkChat = <Link to={`${basePath}myNegociations`} className="btn btn-outline-secondary col-sm-12" type="button">Visualizar mensagens do anúncio.</Link>;
     } else {
       linkChat = <Link to={`${basePath}messageAnnouncement/${id}`} className="btn btn-outline-secondary col-sm-12" type="button">Enive uma mensagem ao vendedor!</Link>;
 
@@ -295,7 +295,7 @@ export const Annoucements = () => {
                 {(signed) ?
                   (<button className="btn btn-outline-secondary col-sm-12" type="button" data-bs-toggle={userIsOwner ? "modal" : "#"} data-bs-target={userIsOwner ? "#modal" : "#"} >Clique aqui para agendar um test drive!</button>)
                   :
-                  (<Link to={basePath + "login"} class="btn btn-outline-secondary col-sm-12">Clique aqui para agendar um test drive!</Link>)
+                  (<Link to={basePath + "login"} className="btn btn-outline-secondary col-sm-12">Clique aqui para agendar um test drive!</Link>)
                 }
               </div>
 

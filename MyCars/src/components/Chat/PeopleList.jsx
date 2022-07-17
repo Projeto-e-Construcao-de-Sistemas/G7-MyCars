@@ -4,13 +4,12 @@ import { useState } from 'react';
 import { db } from '../../services/firebaseConfig';
 import ChatAnnouncement from './ChatAnnouncement'
 
-export default function PeopleList({ listAnnouncements, onClick }) {
+export default function PeopleList({ listAnnouncements, onClick, ownerSet = false }) {
 
     const [listOfAnnouncements, setListOfAnnouncements] = useState(listAnnouncements);
 
     useEffect(() => {
         async function getOwner() {
-
             const announcementsFull = [];
             for (let i = 0; i < listAnnouncements.length; i++) {
                 const announcement = listAnnouncements[i];
@@ -22,19 +21,18 @@ export default function PeopleList({ listAnnouncements, onClick }) {
                 announcement.ownerName = owner.name;
                 announcementsFull.push(announcement);
             }
-            setListOfAnnouncements(announcementsFull);
         }
 
-        getOwner();
-    }, [listAnnouncements, listOfAnnouncements, setListOfAnnouncements])
 
+        if(!ownerSet) getOwner();
+    }, [listAnnouncements, listOfAnnouncements, setListOfAnnouncements, ownerSet])
 
     return (
         <div id="plist" className="people-list">
 
             <ul className="list-unstyled chat-list mt-2 mb-0" >
                 {listAnnouncements.map((announcement) => {
-                    return <ChatAnnouncement onClick={onClick} announcementId={announcement?.id} id={announcement?.idFrom} name={`${announcement?.marca} ${announcement?.modelo} `} img={announcement?.images[0]} owner={announcement?.ownerName}/>
+                    return <ChatAnnouncement key={`${announcement.id} ${announcement.idFrom}`}onClick={onClick} announcementId={announcement?.id} id={announcement?.idFrom} name={`${announcement?.marca} ${announcement?.modelo} `} img={announcement?.images[0]} owner={announcement?.ownerName}/>
                 })}
             </ul>
         </div>

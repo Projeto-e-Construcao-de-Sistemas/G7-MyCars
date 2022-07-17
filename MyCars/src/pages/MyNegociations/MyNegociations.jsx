@@ -23,16 +23,9 @@ export default function MyNegociations() {
     const [messagesAnnouncements, setMessagesAnnouncements] = useState([]);
     const [announcementsPeople, setAnnouncementsPeople] = useState([]);
     const [chatInfos, setChatInfos] = useState(null);
+    const [msgLength, setMsgLength] = useState(messages.length);
+    const [chatSelected, setChatSelected] = useState();
 
-    const [scrollHeight, setScrollHeight] = useState(0);
-
-    function scrollChat() {
-        const chatHistory = document.querySelector("#chat-history");
-        if (scrollHeight !== chatHistory.scrollHeight) {
-            chatHistory.scrollTo(0, chatHistory.scrollHeight);
-            setScrollHeight(chatHistory.scrollHeight);
-        }
-    }
 
     useEffect(() => {
 
@@ -55,14 +48,15 @@ export default function MyNegociations() {
                     ))
                 );
 
-                // console.log(JSON.stringify(msgFiltered));
                 setMessages(msgFiltered);
+                setMsgLength(messages.length);
                 setMessagesAnnouncements(msgAnnouncements);
             });
         }
 
         async function getAnnouncementsPeople() {
             if (messagesAnnouncements.length === 0) return;
+            if (announcementsPeople.length !== 0) return;
 
             const announcementsPeopleList = [];
             for (let i = 0; i < messagesAnnouncements.length; i++) {
@@ -82,19 +76,44 @@ export default function MyNegociations() {
             setAnnouncementsPeople(announcementsPeopleList);
         }
 
-        getMessages();
+        getMessages().then(() => {
+            if (messages.length !== msgLength) {
+                updateChatHistory();
+            }
+        });
         getAnnouncementsPeople();
 
-        // scrollChat();
 
-    }, [scrollChat, setAnnouncementsPeople, setMessages, setMessagesAnnouncements]);
+        function updateChatHistory() {
+            if (!chatSelected) return;
+            const { msgFromId, announcementId } = chatSelected;
+
+
+            const announcement = announcementsPeople.filter((announcementPeople) => {
+                return announcementPeople.id === announcementId;
+            })[0];
+
+            const msgFiltered = messages.filter((msg) => {
+                return (msg.announcement === announcementId) && (msg.idFrom === msgFromId || msg.idTo === msgFromId);
+            });
+
+            setChatInfos({
+                announcement,
+                announcementId,
+                messagesChat: msgFiltered
+            });
+        }
+
+    }, [setAnnouncementsPeople, setMessages, setMessagesAnnouncements, msgLength, setMsgLength, chatSelected, userLogado, announcementsPeople, messages, messagesAnnouncements]);
 
 
     function listItemClicked(item) {
         const msgFromId = item.currentTarget.id;
 
         const announcementId = item.currentTarget.classList[1];
-        const announcement = announcementsPeople.filter((announcementPeople)=>{
+        setChatSelected({ announcementId, msgFromId });
+
+        const announcement = announcementsPeople.filter((announcementPeople) => {
             return announcementPeople.id === announcementId;
         })[0];
 
@@ -128,10 +147,16 @@ export default function MyNegociations() {
                         <div className="col-lg-12">
                             <div className="card chat-app">
 
-                                <PeopleList listAnnouncements={announcementsPeople} onClick={listItemClicked} />
+                                {(msgLength === 0) ?
+                                    (<h2>Você não possui nenhuma mensagem até o momento.</h2>)
+                                    : (
+                                        <div>
+                                            <PeopleList listAnnouncements={announcementsPeople} onClick={listItemClicked} ownerSet={true} />
 
-                                {chatInfos&&<Chat announcementId={chatInfos.announcementId} announcement={chatInfos.announcement} messagesChat={chatInfos.messagesChat} />}
-
+                                            {chatInfos && <Chat announcementId={chatInfos.announcementId} announcement={chatInfos.announcement} messagesChat={chatInfos.messagesChat} />}
+                                        </div>
+                                    )
+                                }
                             </div>
                         </div>
                     </div>
