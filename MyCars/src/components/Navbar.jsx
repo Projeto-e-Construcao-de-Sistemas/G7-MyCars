@@ -1,4 +1,4 @@
-import { faRightFromBracket, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faHeart, faRightFromBracket, faUser } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -44,7 +44,9 @@ export const Navbar = ({ current }) => {
                     ) : (
                         <>
 
-                            <Link to={basePath + "profile"} type="button" className={`btn ${current === 'profile' ? 'btn-primary' : ' btn-outline-primary'}`} >
+                            <Link to={basePath + "favorites"} type="button" className={`btn ${current === 'favorites' ? 'btn-primary' : ' btn-outline-primary'}`} >
+                                <FontAwesomeIcon icon={faHeart} /> Favoritos </Link>
+                            <Link style={{ marginLeft: "10px" }} to={basePath + "profile"} type="button" className={`btn ${current === 'profile' ? 'btn-primary' : ' btn-outline-primary'}`} >
                                 <FontAwesomeIcon icon={faUser} /> Meu perfil </Link>
                             <button type="button" onClick={signOut} className='btn btn-outline-primary' style={{ marginLeft: "10px" }}>
                                 <FontAwesomeIcon icon={faRightFromBracket} /> Sair</button>

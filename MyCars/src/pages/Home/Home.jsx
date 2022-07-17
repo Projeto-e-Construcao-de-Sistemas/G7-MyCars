@@ -7,19 +7,20 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch } from '@fortawesome/free-solid-svg-icons';
 
 import './home.css';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { collection, doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../../services/firebaseConfig';
 
 export const Home = () => {
 
   const { signed } = useContext(AuthenticationContext);
   const userLogado = JSON.parse(sessionStorage.getItem("@AuthFirebase:user"));
-  
-  const baseUrl = process.env.PUBLIC_URL+"/";
+
+  const baseUrl = process.env.PUBLIC_URL + "/";
   const enviromnent = process.env.NODE_ENV;
   const basePath = (enviromnent === "production") ? baseUrl : "/";
 
   const [announcements, setAnnouncements] = useState([]);
+  const [userData, setUserData] = useState(null);
 
   const navigate = useNavigate();
 
@@ -28,23 +29,40 @@ export const Home = () => {
       if (!userLogado) return;
       const providerData = userLogado.providerData;
       if (providerData.length === 1 && providerData[0].providerId === 'google.com') {
-        navigate(basePath+"completeAccount");
+        navigate(basePath + "completeAccount");
       }
     }
 
     function getAnnouncements() {
-      onSnapshot(collection(db, "announcement"), (snapshot)=>{
-        setAnnouncements(snapshot.docs.map((doc) => ({...doc.data(), id: doc.id})));
+      onSnapshot(collection(db, "announcement"), (snapshot) => {
+        setAnnouncements(snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
       });
-  
     }
 
-    getAnnouncements();
+    async function getUserData() {
+      if (userData) return;
 
+      const userDoc = doc(db, 'users', userLogado.uid);
+      // const userDataFromFirebase = (await getDoc(userDoc)).data();
+
+      getDoc(userDoc).then((usr) => {
+        const usrData = usr.data();
+        setUserData(usrData);
+        getAnnouncements();
+      });
+
+    }
+
+    
     if (signed) {
       checkUserHasPassword();
+      getUserData();
+    } else {
+      getAnnouncements();
+
     }
   }, [navigate, userLogado, signed, basePath]);
+
 
 
   return (
@@ -72,7 +90,9 @@ export const Home = () => {
                 quilometragem={announcement.quilometragem}
                 imageUrl={announcement.images[0]}
                 id={announcement.id}
-                estado="Rio de Janeiro - RJ" />
+                estado="Rio de Janeiro - RJ"
+                isFavorite={userData?.favorites.includes(announcement.id)}
+              />
             )
           })}
 
