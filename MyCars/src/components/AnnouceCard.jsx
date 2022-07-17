@@ -1,13 +1,17 @@
-import { faEdit, faLocationDot, faTrashAlt } from '@fortawesome/free-solid-svg-icons'
+import { faEdit, faHeart, faLocationDot, faTrashAlt } from '@fortawesome/free-solid-svg-icons'
+
+import { faHeart as faHeartRegular } from '@fortawesome/free-regular-svg-icons';
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { deleteDoc, doc } from 'firebase/firestore'
+import { arrayRemove, arrayUnion, deleteDoc, doc, updateDoc } from 'firebase/firestore'
 import { deleteObject, getStorage, listAll, ref } from 'firebase/storage'
-import React from 'react'
+import React, { useContext } from 'react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { AuthenticationContext } from '../context/authenticationContext'
 import { db } from '../services/firebaseConfig'
 
-export function AnnouceCard({ title, description, estado, price, yearFabrication, yearVehicle, quilometragem, imageUrl, editable = false, id }) {
+export function AnnouceCard({ title, description, estado, price, yearFabrication, yearVehicle, quilometragem, imageUrl, editable = false, id, isFavorite = false, handleClick = () =>{} }) {
 
     const storage = getStorage();
 
@@ -16,9 +20,13 @@ export function AnnouceCard({ title, description, estado, price, yearFabrication
     const basePath = (enviromnent === "production") ? baseUrl : "/";
 
     const [didLoad, setLoad] = useState(false);
+    const [favorited, setFavorited] = useState(isFavorite);
 
-    const imgStyle = didLoad ? {} : {visibility: 'hidden'};
-    const spinnerStyle = !didLoad ? {marginTop: '30%', marginBottom: '30%'} : {visibility: 'hidden'};
+    const imgStyle = didLoad ? {} : { visibility: 'hidden' };
+    const spinnerStyle = !didLoad ? { marginTop: '30%', marginBottom: '30%' } : { visibility: 'hidden' };
+
+    const { signed } = useContext(AuthenticationContext);
+    const userLogado = JSON.parse(sessionStorage.getItem("@AuthFirebase:user"));
 
     async function deleteAnnounce() {
         const imagesRef = ref(storage, `images/${id}/`);
@@ -31,6 +39,22 @@ export function AnnouceCard({ title, description, estado, price, yearFabrication
         const announceDoc = doc(db, "announcement", id);
         await deleteDoc(announceDoc);
     }
+
+    async function toggleFavorite() {
+        setFavorited(!favorited);
+
+        const userDataRef = doc(db, 'users', userLogado.uid);
+        if (favorited) {
+            await updateDoc(userDataRef, {
+                favorites: arrayRemove(id)
+            });
+        } else {
+            await updateDoc(userDataRef, {
+                favorites: arrayUnion(id)
+            });
+        }
+    }
+
 
     return (
         <div className='col'>
@@ -54,7 +78,10 @@ export function AnnouceCard({ title, description, estado, price, yearFabrication
                 </div>
                 <div className="card-footer">
                     {!editable ? (
-                        <small className="text-mutted"> <FontAwesomeIcon icon={faLocationDot} /> {estado}</small>
+                        <div className='row'>
+                            <small className="col-10 text-mutted" style={{ marginTop: '10px' }}> <FontAwesomeIcon icon={faLocationDot} /> {estado}</small>
+                            {signed && <button className='btn btn-default col-2 align-self-end' id={id} onClick={(e) => { toggleFavorite(e); handleClick(e); }}><FontAwesomeIcon icon={(favorited) ? faHeart : faHeartRegular} /></button>}
+                        </div>
                     ) : (
                         <div className="btn-group col-sm-12" role="group" aria-label="Basic mixed styles example">
                             <Link to={`${basePath}createAnnouncement/${id}`} className="btn btn-warning">

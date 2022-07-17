@@ -85,7 +85,8 @@ export const AuthenticationProvider = ({ children }) => {
             phone,
             birthday,
             cpf,
-            name
+            name,
+            favorites: []
         });
     }
 
