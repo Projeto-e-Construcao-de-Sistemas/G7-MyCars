@@ -52,7 +52,7 @@ export const Sidebar = ({current}) => {
                             <FontAwesomeIcon icon={faDollarSign} /> Criar um anúncio</Link>
                     </li>
                     <li className="nav-item">
-                        <Link to="#" className='nav-link'>
+                        <Link to={basePath+"myNegociations"} className={`nav-link ${current === 'myNegociations' ? 'active' : ''}`}>
                             <FontAwesomeIcon icon={faCommentDollar} /> Minhas negociações</Link>
                     </li>
                     <li className='nav-item' >

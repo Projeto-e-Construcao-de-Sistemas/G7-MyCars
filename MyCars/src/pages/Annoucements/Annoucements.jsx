@@ -12,6 +12,7 @@ import * as yup from "yup";
 import { AuthenticationContext } from '../../context/authenticationContext';
 import { Carousel } from '../../components/Carousel/Carousel';
 import { ThemeContext } from '../../App';
+import { Link } from 'react-router-dom';
 
 
 export const Annoucements = () => {
@@ -19,7 +20,7 @@ export const Annoucements = () => {
   const { id } = useParams();
 
   const { signed } = useContext(AuthenticationContext);
-  const {theme} = useContext(ThemeContext);
+  const { theme } = useContext(ThemeContext);
 
   const userLogado = JSON.parse(sessionStorage.getItem("@AuthFirebase:user"));
 
@@ -30,6 +31,7 @@ export const Annoucements = () => {
   const [currentAnnouncement, setCurrentAnnouncement] = useState();
   const [valorFipe, setValorFipe] = useState();
   const [validateState, setValidateState] = useState("");
+  const [userIsOwner, setuserIsOwner] = useState(false);
 
   const baseUrl = process.env.PUBLIC_URL + "/";
 
@@ -57,7 +59,9 @@ export const Annoucements = () => {
 
       const announcementDoc = doc(db, "announcement", id);
       const response = (await getDoc(announcementDoc)).data();
-      setCurrentAnnouncement(response)
+      setCurrentAnnouncement(response);
+
+      setuserIsOwner(currentAnnouncement?.dono.split('/')[2] === userLogado.uid)
     }
 
     function checkUserHasPassword() {
@@ -72,9 +76,9 @@ export const Annoucements = () => {
 
     async function getFipeValue() {
       const marca = await loadMarca();
-      const modelo = await loadModelo(marca[0].Value);
-      const ano = await laodAnos(marca[0].Value, modelo.Value);
-      const veiculo = await loadVeiculo(marca[0].Value, modelo.Value, ano.Value);
+      const modelo = await loadModelo(marca[0]?.Value);
+      const ano = await laodAnos(marca[0]?.Value, modelo.Value);
+      const veiculo = await loadVeiculo(marca[0]?.Value, modelo.Value, ano.Value);
 
       setValorFipe(veiculo.Valor);
     }
@@ -142,7 +146,7 @@ export const Annoucements = () => {
       const modelos = await response.json();
 
 
-      const modelosFiltered = modelos.Modelos.filter((item) => {
+      const modelosFiltered = modelos?.Modelos?.filter((item) => {
         return item.Label.toLowerCase().includes(currentAnnouncement.modelo.toLowerCase());
       });
 
@@ -161,11 +165,11 @@ export const Annoucements = () => {
       const marcas = await response.json();
 
       const marcaAnuncio = marcas?.filter((marca) => {
-        if (currentAnnouncement.marca.toLowerCase() === "chevrolet") {
+        if (currentAnnouncement?.marca.toLowerCase() === "chevrolet") {
           return marca.Label.toLowerCase() === `gm - ${currentAnnouncement.marca.toLowerCase()}`;
         }
 
-        return marca.Label.toLowerCase() === currentAnnouncement.marca.toLowerCase();
+        return marca?.Label.toLowerCase() === currentAnnouncement?.marca.toLowerCase();
       });
 
       return marcaAnuncio;
@@ -210,6 +214,18 @@ export const Annoucements = () => {
     document.getElementById("btnCancel").click();
     document.getElementById("success").classList.remove("hidden");
     setValidateState("");
+  }
+
+  let linkChat;
+  if (signed) {
+    if (currentAnnouncement?.dono.split('/')[2] === userLogado.uid) {
+      linkChat = <Link to={`${basePath}myNegociations`} className="btn btn-outline-secondary col-sm-12" type="button">Visualizar mensagens do anúncio.</Link>;
+    } else {
+      linkChat = <Link to={`${basePath}messageAnnouncement/${id}`} className="btn btn-outline-secondary col-sm-12" type="button">Enive uma mensagem ao vendedor!</Link>;
+
+    }
+  } else {
+    linkChat = <Link to={basePath + "login"} className="btn btn-outline-secondary col-sm-12">Enive uma mensagem ao vendedor!</Link>;
   }
 
   return (
@@ -276,13 +292,17 @@ export const Annoucements = () => {
 
               <div className="pb-5">
                 <h4>Gostou do veículo? Que tal agendar um test drive?</h4>
-                <button class="btn btn-outline-secondary col-sm-12" type="button" data-bs-toggle="modal" data-bs-target="#modal">Clique aqui para agendar um test drive!</button>
+                {(signed) ?
+                  (<button className="btn btn-outline-secondary col-sm-12" type="button" data-bs-toggle={userIsOwner ? "modal" : "#"} data-bs-target={userIsOwner ? "#modal" : "#"} >Clique aqui para agendar um test drive!</button>)
+                  :
+                  (<Link to={basePath + "login"} className="btn btn-outline-secondary col-sm-12">Clique aqui para agendar um test drive!</Link>)
+                }
               </div>
 
               <div className="">
 
                 <h4>Ou se preferir, mande uma mensagem ao vendedor!</h4>
-                <button class="btn btn-outline-secondary col-sm-12" type="button">Enive uma mensagem ao vendedor!</button>
+                {linkChat}
               </div>
             </div>
           </div>

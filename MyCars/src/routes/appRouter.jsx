@@ -9,6 +9,8 @@ import { MyAnnouncements } from '../pages/MyAnnouncements/MyAnnouncements';
 import CreateAnnouncement from '../pages/CreateAnnouncement/CreateAnnouncement';
 import Annoucements from '../pages/Annoucements/Annoucements';
 import { TestsDrives } from '../pages/TestsDrives/TestsDrives';
+import MessageAnnouncement from '../pages/MessageAnnouncement/MessageAnnouncement';
+import MyNegociations from '../pages/MyNegociations/MyNegociations';
 
 export const AppRoutes = () => {
     const baseUrl = process.env.PUBLIC_URL + "/";
@@ -39,6 +41,14 @@ export const AppRoutes = () => {
 
                 <Route path={basePath + "testsDrives"} exact element={<PrivateRoutes />}>
                     <Route path={basePath + "testsDrives"} exact element={<TestsDrives />} />
+                </Route>
+
+                <Route path={basePath + "messageAnnouncement/:id"} exact element={<PrivateRoutes />}>
+                    <Route path={basePath + "messageAnnouncement/:id"} exact element={<MessageAnnouncement />} />
+                </Route>
+
+                <Route path={basePath + "myNegociations/"} exact element={<PrivateRoutes />}>
+                    <Route path={basePath + "myNegociations/"} exact element={<MyNegociations />} />
                 </Route>
 
                 <Route path={basePath + "completeAccount"} exact element={<CompleteAccount />} />

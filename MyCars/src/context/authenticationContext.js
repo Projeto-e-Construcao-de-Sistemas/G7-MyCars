@@ -65,7 +65,7 @@ export const AuthenticationProvider = ({ children }) => {
             updateProfile(auth.currentUser, { displayName: name }).then(() => {
                 setUser(user);
 
-                createUserData(phone, birthday, cpf, credential.user.uid).then(() => {
+                createUserData(phone, birthday, cpf, name, credential.user.uid).then(() => {
                     sessionStorage.setItem("@AuthFirebase:token", token);
                     sessionStorage.setItem("@AuthFirebase:user", JSON.stringify(user));
 
@@ -80,11 +80,12 @@ export const AuthenticationProvider = ({ children }) => {
         }
     }
 
-    const createUserData = async (phone, birthday, cpf, uid) => {
+    const createUserData = async (phone, birthday, cpf, name, uid) => {
         await setDoc(doc(db, "users", uid), {
             phone,
             birthday,
-            cpf
+            cpf,
+            name
         });
     }
 
@@ -111,7 +112,7 @@ export const AuthenticationProvider = ({ children }) => {
             const usercred = await linkWithCredential(auth.currentUser, credentialEmailPassword);
 
             await updateProfile(auth.currentUser, { displayName: name });
-            await createUserData(phone, birthday, cpf, usercred.user.uid);
+            await createUserData(phone, birthday, cpf, name, usercred.user.uid);
 
             setUser(usercred.user);
             sessionStorage.setItem("@AuthFirebase:user", JSON.stringify(usercred.user));

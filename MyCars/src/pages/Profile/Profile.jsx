@@ -49,7 +49,8 @@ export const Profile = () => {
         await setDoc(doc(db, "users", userLogado.uid), {
             phone,
             birthday,
-            cpf
+            cpf,
+            name
         });
         await updateProfile(auth.currentUser, { displayName: name });
 
