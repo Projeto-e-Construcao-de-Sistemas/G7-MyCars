@@ -91,7 +91,7 @@ export const Home = () => {
                 imageUrl={announcement.images[0]}
                 id={announcement.id}
                 estado="Rio de Janeiro - RJ"
-                isFavorite={userData?.favorites.includes(announcement.id)}
+                isFavorite={userData?.favorites?.includes(announcement.id)}
               />
             )
           })}

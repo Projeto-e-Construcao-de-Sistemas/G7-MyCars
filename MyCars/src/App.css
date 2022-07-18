@@ -42,6 +42,14 @@
   color: #E0E0E0;
 }
 
+#dark .alert-link{
+  color: #842029;
+}
+
+#dark .input-group-text{
+  background-color: #292929;
+}
+
 body{
   padding: 0%;
   margin: 0%;
