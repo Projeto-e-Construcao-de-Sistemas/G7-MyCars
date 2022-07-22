@@ -79,7 +79,8 @@ export const MyAnnouncements = () => {
                                         quilometragem={announcement.quilometragem}
                                         imageUrl={announcement.images[0]}
                                         estado="Rio de Janeiro - RJ"
-                                        editable={true} />
+                                        editable={true}
+                                        finalizado={announcement.anuncioFinalizado} />
                                 )
                             })}
 

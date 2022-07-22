@@ -167,6 +167,8 @@ export const Annoucements = () => {
       const marcaAnuncio = marcas?.filter((marca) => {
         if (currentAnnouncement?.marca.toLowerCase() === "chevrolet") {
           return marca.Label.toLowerCase() === `gm - ${currentAnnouncement.marca.toLowerCase()}`;
+        }else if(currentAnnouncement?.marca.toLowerCase() === "VOLKSWAGEN".toLocaleLowerCase()){
+          return marca.Label.toLowerCase() === `vw - ${currentAnnouncement.marca.toLowerCase()}`;
         }
 
         return marca?.Label.toLowerCase() === currentAnnouncement?.marca.toLowerCase();

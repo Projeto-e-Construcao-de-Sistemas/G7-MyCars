@@ -1,7 +1,6 @@
 import { collection, doc, getDoc, onSnapshot, query, where } from 'firebase/firestore';
 import React, { useContext, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router';
-import { ThemeContext } from '../../App';
 import Chat from '../../components/Chat/Chat';
 import PeopleList from '../../components/Chat/PeopleList';
 import { Navbar } from '../../components/Navbar';
@@ -12,7 +11,6 @@ export default function MessageAnnouncement() {
     const { id } = useParams();
 
     const { signed } = useContext(AuthenticationContext);
-    const { theme } = useContext(ThemeContext);
 
     const userLogado = JSON.parse(sessionStorage.getItem("@AuthFirebase:user"));
 
@@ -82,7 +80,7 @@ export default function MessageAnnouncement() {
         if (signed) {
             checkUserHasPassword();
         }
-    }, [setCurrentAnnouncement, id, currentAnnouncement, basePath, navigate, userLogado, signed]);
+    }, [setCurrentAnnouncement, id, currentAnnouncement, basePath, navigate, userLogado, signed, messages]);
 
     return (
         <div id='root'>
