@@ -1,6 +1,6 @@
 import { faPaperPlane } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { addDoc, collection, doc, getDoc, onSnapshot, query, Timestamp, where } from 'firebase/firestore';
+import { addDoc, collection, doc, getDoc, Timestamp } from 'firebase/firestore';
 import React, { useEffect } from 'react'
 import { useState } from 'react';
 import { db } from '../../services/firebaseConfig';

@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router';
 import { Navbar } from '../../components/Navbar';
 import { AnnouceCard } from '../../components/AnnouceCard';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHeart, faSearch } from '@fortawesome/free-solid-svg-icons';
+import { faHeart } from '@fortawesome/free-solid-svg-icons';
 
 // import './home.css';
 import { collection, doc, getDoc, onSnapshot } from 'firebase/firestore';
@@ -19,7 +19,6 @@ export const Favorites = () => {
     const enviromnent = process.env.NODE_ENV;
     const basePath = (enviromnent === "production") ? baseUrl : "/";
 
-    const [announcements, setAnnouncements] = useState([]);
     const [favorites, setFavorites] = useState([]);
     const [userData, setUserData] = useState(null);
 
@@ -39,7 +38,7 @@ export const Favorites = () => {
                 const announcements = snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
 
                 const fav = announcements.filter((announcement)=>{
-                    return usrData.favorites.includes(announcement.id);
+                    return usrData.favorites.includes(announcement.id) && !announcement.anuncioFinalizado;
                 });
 
                 setFavorites(fav);
@@ -64,7 +63,7 @@ export const Favorites = () => {
         if (signed) {
             checkUserHasPassword();
         }
-    }, [navigate, userLogado, signed, basePath, favorites, setFavorites]);
+    }, [navigate, userLogado, signed, basePath, favorites, setFavorites, userData]);
 
     function handleClick(e){
         const announceId = e.currentTarget.id;

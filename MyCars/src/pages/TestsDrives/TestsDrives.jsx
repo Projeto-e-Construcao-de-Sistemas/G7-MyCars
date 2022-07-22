@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { AuthenticationContext } from '../../context/authenticationContext';
 import { useNavigate } from 'react-router';
-import { Navbar } from '../../components/Navbar';
 
 import { collection, getDocs, onSnapshot, query, where } from 'firebase/firestore';
 import { db } from '../../services/firebaseConfig';
