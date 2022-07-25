@@ -35,7 +35,7 @@ export const Home = () => {
 
     function getAnnouncements() {
       onSnapshot(collection(db, "announcement"), (snapshot) => {
-        setAnnouncements(snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+        setAnnouncements(snapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id })).filter((announcement)=>{return !announcement.anuncioFinalizado}));
       });
     }
 
@@ -61,7 +61,7 @@ export const Home = () => {
       getAnnouncements();
 
     }
-  }, [navigate, userLogado, signed, basePath]);
+  }, [navigate, userLogado, signed, basePath, userData]);
 
 
 
@@ -91,7 +91,7 @@ export const Home = () => {
                 imageUrl={announcement.images[0]}
                 id={announcement.id}
                 estado="Rio de Janeiro - RJ"
-                isFavorite={userData?.favorites.includes(announcement.id)}
+                isFavorite={userData?.favorites?.includes(announcement.id)}
               />
             )
           })}
