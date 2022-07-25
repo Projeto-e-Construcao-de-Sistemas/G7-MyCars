@@ -13,9 +13,11 @@ export const CompleteAccount = () => {
     const { linkCredentials, signed } = useContext(AuthenticationContext);
     const navigate = useNavigate();
 
-    const baseUrl = process.env.PUBLIC_URL+"/";
-    const enviromnent = process.env.NODE_ENV;
-    const basePath = (enviromnent === "production") ? baseUrl : "/";
+    // const baseUrl = process.env.PUBLIC_URL+"/";
+    // const enviromnent = process.env.NODE_ENV;
+    // const basePath = (enviromnent === "production") ? baseUrl : "/";
+
+    const basePath = "/";
 
     const schema = yup.object({
         name: yup.string().required("Por favor, preencha o campo nome."),

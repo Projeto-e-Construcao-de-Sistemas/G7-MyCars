@@ -16,10 +16,11 @@ export const Sidebar = ({ current }) => {
     const [darkMode, setDarkMode] = useState(localStorage.getItem("theme") === "dark");
     const navigate = useNavigate();
 
-    const baseUrl = process.env.PUBLIC_URL + "/";
-    const enviromnent = process.env.NODE_ENV;
-    const basePath = (enviromnent === "production") ? baseUrl : "/";
+    // const baseUrl = process.env.PUBLIC_URL + "/";
+    // const enviromnent = process.env.NODE_ENV;
+    // const basePath = (enviromnent === "production") ? baseUrl : "/";
 
+    const basePath = "/";
 
     async function signOut() {
         await signOutFromApp();

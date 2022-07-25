@@ -22,9 +22,11 @@ export const Profile = () => {
     const { signed, signOutFromApp } = useContext(AuthenticationContext);
     const userLogado = JSON.parse(sessionStorage.getItem("@AuthFirebase:user"));
 
-    const baseUrl = process.env.PUBLIC_URL + "/";
-    const enviromnent = process.env.NODE_ENV;
-    const basePath = (enviromnent === "production") ? baseUrl : "/";
+    // const baseUrl = process.env.PUBLIC_URL + "/";
+    // const enviromnent = process.env.NODE_ENV;
+    // const basePath = (enviromnent === "production") ? baseUrl : "/";
+
+    const basePath = "/";
 
     const navigate = useNavigate();
 

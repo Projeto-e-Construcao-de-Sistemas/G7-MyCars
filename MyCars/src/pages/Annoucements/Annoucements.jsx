@@ -33,11 +33,12 @@ export const Annoucements = () => {
   const [validateState, setValidateState] = useState("");
   const [userIsOwner, setuserIsOwner] = useState(false);
 
-  const baseUrl = process.env.PUBLIC_URL + "/";
+  // const baseUrl = process.env.PUBLIC_URL + "/";
 
-  const enviromnent = process.env.NODE_ENV;
-  const basePath = (enviromnent === "production") ? baseUrl : "/";
+  // const enviromnent = process.env.NODE_ENV;
+  // const basePath = (enviromnent === "production") ? baseUrl : "/";
 
+  const basePath = "/";
 
   const schema = yup.object({
     date: yup.string().required("Selecione uma data válida"),

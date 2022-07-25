@@ -19,11 +19,12 @@ export default function MessageAnnouncement() {
     const [currentAnnouncement, setCurrentAnnouncement] = useState();
     const [messages, setMessages] = useState([]);
 
-    const baseUrl = process.env.PUBLIC_URL + "/";
+    // const baseUrl = process.env.PUBLIC_URL + "/";
 
-    const enviromnent = process.env.NODE_ENV;
-    const basePath = (enviromnent === "production") ? baseUrl : "/";
+    // const enviromnent = process.env.NODE_ENV;
+    // const basePath = (enviromnent === "production") ? baseUrl : "/";
 
+    const basePath = "/";
 
     useEffect(() => {
 
