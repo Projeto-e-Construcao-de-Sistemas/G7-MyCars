@@ -21,7 +21,9 @@ server.listen(port, () => {
 });
 
 io.on('connection', (socket) => {
+  console.log("client connected!");
   socket.on('notification', (data)=>{
+    console.log("new notification");
    socket.broadcast.emit("notification", data);
   });
 });
