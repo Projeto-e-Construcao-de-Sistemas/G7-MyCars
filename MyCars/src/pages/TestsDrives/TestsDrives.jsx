@@ -14,10 +14,6 @@ export function TestsDrives() {
     const { signed } = useContext(AuthenticationContext);
     const userLogado = JSON.parse(sessionStorage.getItem("@AuthFirebase:user"));
 
-    // const baseUrl = process.env.PUBLIC_URL + "/";
-    // const enviromnent = process.env.NODE_ENV;
-    // const basePath = (enviromnent === "production") ? baseUrl : "/";
-
     const basePath = "/";
 
     const [announcements, setAnnouncements] = useState([]);
@@ -69,6 +65,7 @@ export function TestsDrives() {
                         title: annoucement.marca + " " + annoucement.modelo,
                         solicitanteName: testDrive.nomeSolicitante,
                         dateTime: testDriveDateTimeString,
+                        solicitanteId: testDrive.solicitante,
                         id: testDrive.id,
                         imageUrl: annoucement.images[0]
                     });
@@ -116,6 +113,7 @@ export function TestsDrives() {
                                 imageUrl={cardComponent.imageUrl}
                                 id={cardComponent.id}
                                 key={cardComponent.id}
+                                solicitanteId={cardComponent.solicitanteId}
                                 onUpdate={onUpdate}
                             />
                         })}

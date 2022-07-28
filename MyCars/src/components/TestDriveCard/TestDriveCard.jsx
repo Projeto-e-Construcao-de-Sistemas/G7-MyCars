@@ -1,35 +1,55 @@
-import { faBan, faCheck} from '@fortawesome/free-solid-svg-icons'
+import { faBan, faCheck } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import {  doc, updateDoc } from 'firebase/firestore'
+import { doc, updateDoc } from 'firebase/firestore'
 import React from 'react'
+import { useContext } from 'react'
 import { useState } from 'react'
 import { db } from '../../services/firebaseConfig'
+import { NotificationContext } from '../Notification/NotificationContext'
 
-export function TestDriveCard({ title, solicitanteName, dateTime, imageUrl, id, onUpdate}) {
+export function TestDriveCard({ title, solicitanteName, dateTime, imageUrl, id, onUpdate, solicitanteId }) {
 
     const [didLoad, setLoad] = useState(false);
+
+    const { sendNotificationSocket } = useContext(NotificationContext);
 
     const imgStyle = didLoad ? {} : { visibility: 'hidden' };
     const spinnerStyle = !didLoad ? { marginTop: '30%', marginBottom: '30%' } : { visibility: 'hidden' };
 
-    async function approveTestDrive(){
+    async function approveTestDrive() {
         const testDriveDoc = doc(db, "testsDrive", id);
 
         await updateDoc(testDriveDoc, {
             approved: true
         })
 
+        sendNotificationToCustomer(true);
         onUpdate();
     }
 
-    async function declineTestDrive(){
+
+    async function declineTestDrive() {
         const testDriveDoc = doc(db, "testsDrive", id);
 
         await updateDoc(testDriveDoc, {
             declined: true
         });
         onUpdate();
+    
+        sendNotificationToCustomer(false);
     }
+
+    function sendNotificationToCustomer(status) {
+        const now = new Date();
+        const testDriveStatus = (status) ? "aceita" : "recusada";
+        const titleNotification = `Solicitação de test drive ${testDriveStatus}`
+        const subtitle = `${now.getHours()}:${now.getMinutes()}`
+        const message = `A sua solicitação de test drive para o veículo ${title}, no dia ${dateTime} foi ${testDriveStatus}.`
+        const idTo = solicitanteId
+
+        sendNotificationSocket(titleNotification, subtitle, message, idTo)
+    }
+
 
     return (
         <div className='col'>

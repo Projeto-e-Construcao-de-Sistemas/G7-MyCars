@@ -14,9 +14,6 @@ import MyNegociations from '../pages/MyNegociations/MyNegociations';
 import { Favorites } from '../pages/Favorites/Favorites';
 
 export const AppRoutes = () => {
-    // const baseUrl = process.env.PUBLIC_URL + "/";
-    // const enviromnent = process.env.NODE_ENV;
-    // const basePath = (enviromnent === "production") ? baseUrl : "/";
 
     const basePath = "/";
     return (
