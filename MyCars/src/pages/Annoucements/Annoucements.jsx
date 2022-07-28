@@ -13,6 +13,7 @@ import { AuthenticationContext } from '../../context/authenticationContext';
 import { Carousel } from '../../components/Carousel/Carousel';
 import { ThemeContext } from '../../App';
 import { Link } from 'react-router-dom';
+import { NotificationContext } from '../../components/Notification/NotificationContext';
 
 
 export const Annoucements = () => {
@@ -21,6 +22,8 @@ export const Annoucements = () => {
 
   const { signed } = useContext(AuthenticationContext);
   const { theme } = useContext(ThemeContext);
+  const { sendNotificationSocket, createNotification } = useContext(NotificationContext);
+
 
   const userLogado = JSON.parse(sessionStorage.getItem("@AuthFirebase:user"));
 
@@ -214,10 +217,28 @@ export const Annoucements = () => {
 
     await addDoc(collection(db, "testsDrive"), testDriveData);
 
+    const ownerId = currentAnnouncement.dono.split('/')[2];
+    const vehicle = currentAnnouncement.marca + " " + currentAnnouncement.modelo;
+    sendNotificationToOwner(ownerId, vehicle, dateTime);
+
     document.getElementById("btnCancel").click();
-    document.getElementById("success").classList.remove("hidden");
+    createNotification("Test drive solicitado", "Agora", "O seu test drive foi solicitado e está aguardando a aprovação do anunciante!");
     setValidateState("");
   }
+
+
+  function sendNotificationToOwner(idTo, vehicle, date) {
+    const now = new Date();
+
+    const testDriveTime = `${date.getHours()}:${date.getMinutes()}`
+    const testDriveDate = ` ${date.toLocaleDateString('pt-BR')} às ${testDriveTime}`
+
+    const titleNotification = `Nova solicitação de test drive`;
+    const subtitle = `${now.getHours()}:${now.getMinutes()}`;
+    const message = `O usuário ${userLogado.displayName} solicitou um test drive do veículo ${vehicle} no dia ${testDriveDate}.`;
+
+    sendNotificationSocket(titleNotification, subtitle, message, idTo);
+}
 
   let linkChat;
   let linkTestDrive;

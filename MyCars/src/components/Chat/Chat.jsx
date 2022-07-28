@@ -1,9 +1,10 @@
 import { faPaperPlane } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { addDoc, collection, doc, getDoc, Timestamp } from 'firebase/firestore';
-import React, { useEffect } from 'react'
+import React, { useContext, useEffect } from 'react'
 import { useState } from 'react';
 import { db } from '../../services/firebaseConfig';
+import { NotificationContext } from '../Notification/NotificationContext';
 
 import './Chat.css';
 import ChatHeader from './ChatHeader';
@@ -11,6 +12,9 @@ import MyMessage from './MyMessage';
 import OtherMessage from './OtherMessage';
 
 export default function Chat({ announcement, announcementId, messagesChat}) {
+
+    const { sendNotificationSocket } = useContext(NotificationContext);
+
 
     const userLogado = JSON.parse(sessionStorage.getItem("@AuthFirebase:user"));
     const [txtMessage, setTxtMessage] = useState("");
@@ -65,6 +69,13 @@ export default function Chat({ announcement, announcementId, messagesChat}) {
         }
 
         addDoc(collection(db, "messageNegociation"), messageData);
+
+        const notificationTitle = `Nova mensagem de ${userLogado.displayName}`;
+        const now = new Date();
+        const notificationSubtitle = `${now.getHours()}:${now.getMinutes()}`;
+        const notificationMessage = txtMessage;
+
+        sendNotificationSocket(notificationTitle, notificationSubtitle, notificationMessage, idTo);
         setTxtMessage("");
         scrollChat();
     }
