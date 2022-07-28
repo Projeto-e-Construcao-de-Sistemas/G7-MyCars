@@ -12,9 +12,8 @@ const io = new Server(server, {
   }
 });
 
-
 app.get('/', (req, res) => {
-  res.send('<h1>Hello world</h1>');
+  res.send('<h1>Webservice do projeto MyCars</h1>');
 });
 
 server.listen(port, () => {
