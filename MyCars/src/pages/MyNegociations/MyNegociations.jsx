@@ -144,7 +144,7 @@ export default function MyNegociations() {
             <div className="container-fluid">
                 <Sidebar current={"myNegociations"} />
 
-                <div className="container">
+                <div className="container col-sm-8">
                     <div className="row clearfix">
                         <div className="col-lg-12">
                             <div className="card chat-app">
