@@ -22,7 +22,7 @@ export const Annoucements = () => {
 
   const { signed } = useContext(AuthenticationContext);
   const { theme } = useContext(ThemeContext);
-  const { sendNotificationSocket } = useContext(NotificationContext);
+  const { sendNotificationSocket, createNotification } = useContext(NotificationContext);
 
 
   const userLogado = JSON.parse(sessionStorage.getItem("@AuthFirebase:user"));
@@ -217,13 +217,12 @@ export const Annoucements = () => {
 
     await addDoc(collection(db, "testsDrive"), testDriveData);
 
-    
     const ownerId = currentAnnouncement.dono.split('/')[2];
     const vehicle = currentAnnouncement.marca + " " + currentAnnouncement.modelo;
     sendNotificationToOwner(ownerId, vehicle, dateTime);
 
     document.getElementById("btnCancel").click();
-    document.getElementById("success").classList.remove("hidden");
+    createNotification("Test drive solicitado", "Agora", "O seu test drive foi solicitado e está aguardando a aprovação do anunciante!");
     setValidateState("");
   }
 

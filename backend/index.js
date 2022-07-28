@@ -13,7 +13,7 @@ const io = new Server(server, {
 });
 
 app.get('/', (req, res) => {
-  res.send('<h1>Webservice do projeto MyCars</h1>');
+  res.send('<a href="https://g7-my-cars.vercel.app/">Projeto MYCARS!</a>');
 });
 
 server.listen(port, () => {
@@ -21,9 +21,7 @@ server.listen(port, () => {
 });
 
 io.on('connection', (socket) => {
-  console.log("client connected!");
-  socket.on('notification', (data)=>{
-    console.log("new notification");
-   socket.broadcast.emit("notification", data);
+  socket.on('notification', (data) => {
+    socket.broadcast.emit("notification", data);
   });
 });
