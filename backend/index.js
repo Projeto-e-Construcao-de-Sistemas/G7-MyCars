@@ -3,6 +3,8 @@ const app = express();
 const http = require('http');
 const server = http.createServer(app);
 const { Server } = require("socket.io");
+
+const port = process.env.PORT || 3001;
 const io = new Server(server, {
   cors: {
     origin: "*",
@@ -15,8 +17,8 @@ app.get('/', (req, res) => {
   res.send('<h1>Hello world</h1>');
 });
 
-server.listen(3001, () => {
-  console.log('listening on *:3001');
+server.listen(port, () => {
+  console.log(`listening on *:${port}`);
 });
 
 io.on('connection', (socket) => {
