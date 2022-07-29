@@ -60,6 +60,7 @@ export const NotificationProvider = ({ children }) => {
 
         socket.on('notification', (data) => {
             if(userLogado === null) return;
+            if(window.location.href.includes("myNegociations")) return;
             
             const {title, subtitle, message, idTo} = data;
             
