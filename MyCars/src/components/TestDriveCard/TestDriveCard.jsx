@@ -34,9 +34,10 @@ export function TestDriveCard({ title, solicitanteName, dateTime, imageUrl, id, 
         await updateDoc(testDriveDoc, {
             declined: true
         });
+        
+        sendNotificationToCustomer(false);
         onUpdate();
     
-        sendNotificationToCustomer(false);
     }
 
     function sendNotificationToCustomer(status) {
